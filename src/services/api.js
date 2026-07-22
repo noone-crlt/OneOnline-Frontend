@@ -411,3 +411,39 @@ export function getFileUrl(path) {
 export function getFeaturedCategories() {
   return apiFetch('/api/categories/featured')
 }
+
+// ============= Address Management =============
+
+export function getAddresses() {
+  return apiFetch('/api/auth/addresses', { headers: authHeaders() })
+}
+
+export function addAddress(payload) {
+  return apiFetch('/api/auth/addresses', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: payload,
+  })
+}
+
+export function updateAddress(id, payload) {
+  return apiFetch(`/api/auth/addresses/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: payload,
+  })
+}
+
+export function deleteAddress(id) {
+  return apiFetch(`/api/auth/addresses/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+}
+
+export function setDefaultAddress(id) {
+  return apiFetch(`/api/auth/addresses/${id}/default`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+  })
+}
