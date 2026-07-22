@@ -108,35 +108,15 @@ onMounted(loadDashboard)
     
     <div v-else-if="summary" class="bento-grid">
       
-      <!-- Top Row: Hero Revenue Card (span 8) + System Status Card (span 4) -->
-      <div class="top-bento-row">
-        <!-- Hero KPI Card -->
-        <div class="bento-card hero-kpi-card bento-item">
-          <div class="card-surface kpi-surface">
-            <div class="kpi-content">
-              <span class="kpi-label">Tổng doanh thu hệ thống</span>
-              <strong class="kpi-value">{{ currencyNumber.format(summary?.totalRevenue ?? 0) }}</strong>
-            </div>
-            <div class="kpi-icon-bg">
-              <PhCurrencyDollar :size="120" weight="duotone" />
-            </div>
+      <!-- Hero KPI Card -->
+      <div class="bento-card hero-kpi-card bento-item">
+        <div class="card-surface kpi-surface">
+          <div class="kpi-content">
+            <span class="kpi-label">Tổng doanh thu hệ thống</span>
+            <strong class="kpi-value">{{ currencyNumber.format(summary?.totalRevenue ?? 0) }}</strong>
           </div>
-        </div>
-
-        <!-- System Status Card -->
-        <div class="bento-card status-kpi-card bento-item">
-          <div class="card-surface status-surface">
-            <div class="status-header">
-              <span class="status-dot"></span>
-              <span class="status-label">Trạng thái hệ thống</span>
-            </div>
-            <div class="status-body">
-              <h3>Đang hoạt động tốt</h3>
-              <p>Mọi kết nối cơ sở dữ liệu, API Gateway và máy chủ lưu trữ tài liệu đều ổn định, không có cảnh báo nào.</p>
-            </div>
-            <div class="status-footer">
-              <span>Đồng bộ thời gian thực</span>
-            </div>
+          <div class="kpi-icon-bg">
+            <PhCurrencyDollar :size="120" weight="duotone" />
           </div>
         </div>
       </div>
@@ -223,18 +203,18 @@ onMounted(loadDashboard)
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 1.5rem;
 }
 
 .admin-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 0.5rem;
+  padding: 0 0.25rem;
 }
 
 .admin-header h2 {
-  font-size: 2.25rem;
+  font-size: 1.85rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   margin: 0 0 0.25rem 0;
@@ -244,7 +224,7 @@ onMounted(loadDashboard)
 .admin-header p {
   color: var(--text-muted);
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .action-btn {
@@ -253,23 +233,24 @@ onMounted(loadDashboard)
   gap: 0.5rem;
   background: var(--bento-surface);
   border: 1px solid var(--bento-border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  padding: 0.75rem 1.25rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  padding: 0.6rem 1.1rem;
   border-radius: 99px;
   font-weight: 600;
   font-family: inherit;
   color: var(--text-main);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-size: 0.88rem;
 }
 
 .action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px -6px rgba(0, 0, 0, 0.08);
 }
 
 .action-btn:active {
-  transform: scale(0.96);
+  transform: scale(0.97);
 }
 
 .spin {
@@ -285,31 +266,18 @@ onMounted(loadDashboard)
 .bento-grid {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
-}
-
-/* Top Bento Row: Asymmetric 2-column on desktop */
-.top-bento-row {
-  display: grid;
-  grid-template-columns: 2.2fr 1fr;
   gap: 1.5rem;
 }
 
-@media (max-width: 1024px) {
-  .top-bento-row {
-    grid-template-columns: 1fr;
-  }
-}
-
 .card-title-outside {
-  margin-bottom: 1rem;
-  padding: 0 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0 0.25rem;
 }
 
 .card-title-outside h3 {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 800;
-  margin: 0 0 0.25rem 0;
+  margin: 0 0 0.15rem 0;
   letter-spacing: -0.02em;
   color: var(--text-main);
 }
@@ -317,51 +285,51 @@ onMounted(loadDashboard)
 .card-title-outside p {
   color: var(--text-muted);
   margin: 0;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
 }
 
 .granularity-select {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.85rem;
   border-radius: 99px;
   border: 1px solid var(--bento-border);
   background: var(--bento-surface);
   color: var(--text-main);
   font-family: inherit;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
   outline: none;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   transition: all 0.2s;
 }
 
 .granularity-select:hover {
   border-color: #d4d4d8;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.04);
 }
 
 .card-surface {
   background: #ffffff;
-  border-radius: 2rem;
+  border-radius: 1.25rem;
   border: 1px solid rgba(24, 24, 27, 0.06);
-  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.03);
-  padding: 2rem;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,0.03);
+  padding: 1.25rem;
   height: 100%;
 }
 
-/* Premium KPI Surface (Dark theme) */
+/* Premium KPI Surface (Dark theme) - Compact */
 .kpi-surface {
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 3rem;
+  padding: 1.75rem 2rem;
   background: #09090b;
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 2rem;
+  border-radius: 1.25rem;
   height: 100%;
-  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
+  box-shadow: 0 12px 24px -10px rgba(0,0,0,0.3);
 }
 
 .kpi-content {
@@ -372,105 +340,38 @@ onMounted(loadDashboard)
 }
 
 .kpi-label {
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  color: #71717a; /* Zinc 400 */
+  color: #71717a;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .kpi-value {
-  font-size: clamp(2.5rem, 4vw, 4.5rem);
+  font-size: clamp(2rem, 3.5vw, 3rem);
   font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
   color: white;
   font-family: Satoshi, monospace;
 }
 
 .kpi-icon-bg {
   position: absolute;
-  right: -5%;
-  bottom: -15%;
+  right: 5%;
+  bottom: -25%;
   color: rgba(255, 255, 255, 0.03);
   transform: rotate(-15deg);
   pointer-events: none;
   z-index: 1;
 }
 
-/* System status card */
-.status-surface {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  padding: 2.25rem;
-  background: #ffffff;
-  border-radius: 2rem;
-  border: 1px solid rgba(24, 24, 27, 0.06);
-  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.03);
-}
-
-.status-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #10b981;
-  display: inline-block;
-  animation: status-pulse-glow 2s infinite;
-}
-
-@keyframes status-pulse-glow {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-
-.status-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.status-body h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: var(--text-main);
-  letter-spacing: -0.02em;
-}
-
-.status-body p {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
-.status-footer {
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #10b981;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
 /* Charts Grid */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
   width: 100%;
 }
 
@@ -488,14 +389,14 @@ onMounted(loadDashboard)
 .metrics-bento-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 1.5rem;
+  gap: 1.25rem;
   align-items: start;
 }
 
 .metric-item {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem;
 }
 
 .large-metric {
@@ -520,32 +421,32 @@ onMounted(loadDashboard)
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2.25rem;
+  padding: 1.25rem;
   background: #ffffff;
-  border-radius: 2rem;
+  border-radius: 1.25rem;
   border: 1px solid rgba(24, 24, 27, 0.06);
-  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.03);
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,0.03);
   height: auto;
-  min-height: 140px;
+  min-height: 110px;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .metric-surface:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 24px 48px -15px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.08);
   border-color: rgba(24, 24, 27, 0.1);
 }
 
 .metric-icon-wrapper {
   display: flex;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .metric-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 1rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.75rem;
   display: grid;
   place-items: center;
   transition: transform 0.3s;
@@ -556,38 +457,38 @@ onMounted(loadDashboard)
 }
 
 .large-metric .metric-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 1.25rem;
+  width: 52px;
+  height: 52px;
+  border-radius: 1rem;
 }
 
 .metric-value {
-  font-size: 2.25rem;
+  font-size: 1.85rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   color: var(--text-main);
   font-family: Satoshi, monospace;
 }
 
 .large-value {
-  font-size: 3rem;
+  font-size: 2.25rem;
 }
 
 .metric-label-outside {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: 0 0.5rem;
+  padding: 0 0.25rem;
 }
 
 /* Skeleton Loading */
 .skeleton-card {
-  height: 160px;
+  height: 120px;
   background: var(--bento-surface);
-  border-radius: 2.5rem;
+  border-radius: 1.25rem;
   border: 1px solid var(--bento-border);
   position: relative;
   overflow: hidden;
@@ -614,14 +515,14 @@ onMounted(loadDashboard)
   justify-content: center;
   gap: 1rem;
   background: var(--bento-surface);
-  border-radius: 2.5rem;
+  border-radius: 1.25rem;
   border: 1px dashed rgba(239, 68, 68, 0.3);
-  padding: 4rem;
+  padding: 3rem;
   text-align: center;
 }
 
 .error-state h3 {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
   margin: 0;
 }
