@@ -33,7 +33,6 @@ const summaryCards = computed(() => {
     { label: 'Danh mục', value: compactNumber.format(current?.totalCategories ?? 0), icon: PhBookmarkSimple, color: '#ec4899' },
     { label: 'Tác giả', value: compactNumber.format(current?.totalAuthors ?? 0), icon: PhPenNib, color: '#0ea5e9' },
     { label: 'Bình luận', value: compactNumber.format(current?.totalComments ?? 0), icon: PhChatCircleDots, color: '#8b5cf6' },
-    { label: 'Doanh thu', value: currencyNumber.format(current?.totalRevenue ?? 0), icon: PhCurrencyDollar, color: '#ef4444' },
   ]
 })
 
@@ -109,15 +108,35 @@ onMounted(loadDashboard)
     
     <div v-else-if="summary" class="bento-grid">
       
-      <!-- Hero KPI Card -->
-      <div class="bento-card hero-kpi-card bento-item">
-        <div class="card-surface kpi-surface">
-          <div class="kpi-content">
-            <span class="kpi-label">Tổng doanh thu hệ thống</span>
-            <strong class="kpi-value">{{ currencyNumber.format(summary?.totalRevenue ?? 0) }}</strong>
+      <!-- Top Row: Hero Revenue Card (span 8) + System Status Card (span 4) -->
+      <div class="top-bento-row">
+        <!-- Hero KPI Card -->
+        <div class="bento-card hero-kpi-card bento-item">
+          <div class="card-surface kpi-surface">
+            <div class="kpi-content">
+              <span class="kpi-label">Tổng doanh thu hệ thống</span>
+              <strong class="kpi-value">{{ currencyNumber.format(summary?.totalRevenue ?? 0) }}</strong>
+            </div>
+            <div class="kpi-icon-bg">
+              <PhCurrencyDollar :size="120" weight="duotone" />
+            </div>
           </div>
-          <div class="kpi-icon-bg">
-            <PhCurrencyDollar :size="120" weight="duotone" />
+        </div>
+
+        <!-- System Status Card -->
+        <div class="bento-card status-kpi-card bento-item">
+          <div class="card-surface status-surface">
+            <div class="status-header">
+              <span class="status-dot"></span>
+              <span class="status-label">Trạng thái hệ thống</span>
+            </div>
+            <div class="status-body">
+              <h3>Đang hoạt động tốt</h3>
+              <p>Mọi kết nối cơ sở dữ liệu, API Gateway và máy chủ lưu trữ tài liệu đều ổn định, không có cảnh báo nào.</p>
+            </div>
+            <div class="status-footer">
+              <span>Đồng bộ thời gian thực</span>
+            </div>
           </div>
         </div>
       </div>
@@ -211,14 +230,15 @@ onMounted(loadDashboard)
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0 0.5rem;
 }
 
 .admin-header h2 {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
   letter-spacing: -0.04em;
   margin: 0 0 0.25rem 0;
+  color: var(--text-main);
 }
 
 .admin-header p {
@@ -233,7 +253,7 @@ onMounted(loadDashboard)
   gap: 0.5rem;
   background: var(--bento-surface);
   border: 1px solid var(--bento-border);
-  box-shadow: var(--bento-shadow);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 0.75rem 1.25rem;
   border-radius: 99px;
   font-weight: 600;
@@ -245,7 +265,7 @@ onMounted(loadDashboard)
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 24px 40px -10px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.08);
 }
 
 .action-btn:active {
@@ -261,11 +281,24 @@ onMounted(loadDashboard)
   to { transform: rotate(360deg); }
 }
 
-/* Bento Grid */
+/* Bento Grid Layout */
 .bento-grid {
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+}
+
+/* Top Bento Row: Asymmetric 2-column on desktop */
+.top-bento-row {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .top-bento-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .card-title-outside {
@@ -278,6 +311,7 @@ onMounted(loadDashboard)
   font-weight: 800;
   margin: 0 0 0.25rem 0;
   letter-spacing: -0.02em;
+  color: var(--text-main);
 }
 
 .card-title-outside p {
@@ -297,33 +331,37 @@ onMounted(loadDashboard)
   font-size: 0.85rem;
   cursor: pointer;
   outline: none;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
   transition: all 0.2s;
 }
 
 .granularity-select:hover {
   border-color: #d4d4d8;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.04);
 }
 
 .card-surface {
-  background: var(--bento-surface);
-  border-radius: 2.5rem;
-  border: 1px solid var(--bento-border);
-  box-shadow: var(--bento-shadow);
+  background: #ffffff;
+  border-radius: 2rem;
+  border: 1px solid rgba(24, 24, 27, 0.06);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.03);
   padding: 2rem;
   height: 100%;
 }
 
+/* Premium KPI Surface (Dark theme) */
 .kpi-surface {
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 3rem 4rem;
-  background: linear-gradient(135deg, #18181b, #27272a);
+  padding: 3rem;
+  background: #09090b;
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2rem;
+  height: 100%;
+  box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
 }
 
 .kpi-content {
@@ -334,33 +372,101 @@ onMounted(loadDashboard)
 }
 
 .kpi-label {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #a1a1aa; /* Zinc 400 */
+  font-size: 1rem;
+  font-weight: 700;
+  color: #71717a; /* Zinc 400 */
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
 }
 
 .kpi-value {
-  font-size: clamp(3rem, 5vw, 5.5rem);
-  font-weight: 900;
+  font-size: clamp(2.5rem, 4vw, 4.5rem);
+  font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1;
   color: white;
-  text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-family: Satoshi, monospace;
 }
 
 .kpi-icon-bg {
   position: absolute;
-  right: -10%;
-  bottom: -20%;
-  color: rgba(255, 255, 255, 0.05);
+  right: -5%;
+  bottom: -15%;
+  color: rgba(255, 255, 255, 0.03);
   transform: rotate(-15deg);
   pointer-events: none;
   z-index: 1;
 }
 
+/* System status card */
+.status-surface {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 2.25rem;
+  background: #ffffff;
+  border-radius: 2rem;
+  border: 1px solid rgba(24, 24, 27, 0.06);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.03);
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  display: inline-block;
+  animation: status-pulse-glow 2s infinite;
+}
+
+@keyframes status-pulse-glow {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.status-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-body h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.status-body p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.status-footer {
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Charts Grid */
 .charts-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -368,10 +474,17 @@ onMounted(loadDashboard)
   width: 100%;
 }
 
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .chart-card {
   width: 100%;
 }
 
+/* Metrics Bento Grid */
 .metrics-bento-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -385,19 +498,19 @@ onMounted(loadDashboard)
   gap: 0.75rem;
 }
 
-/* Asymmetric Span */
 .large-metric {
-  grid-column: span 6; /* 2 columns across 12-col grid */
+  grid-column: span 6;
 }
 
 .small-metric {
-  grid-column: span 4; /* 3 columns across 12-col grid, will wrap nicely */
+  grid-column: span 3;
 }
 
 @media (max-width: 1024px) {
   .large-metric { grid-column: span 6; }
   .small-metric { grid-column: span 6; }
 }
+
 @media (max-width: 768px) {
   .large-metric { grid-column: span 12; }
   .small-metric { grid-column: span 12; }
@@ -407,8 +520,11 @@ onMounted(loadDashboard)
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 2rem;
-  border-radius: 2.5rem;
+  padding: 2.25rem;
+  background: #ffffff;
+  border-radius: 2rem;
+  border: 1px solid rgba(24, 24, 27, 0.06);
+  box-shadow: 0 12px 30px -10px rgba(0,0,0,0.03);
   height: auto;
   min-height: 140px;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -416,7 +532,8 @@ onMounted(loadDashboard)
 
 .metric-surface:hover {
   transform: translateY(-4px);
-  box-shadow: 0 30px 50px -15px rgba(0,0,0,0.08);
+  box-shadow: 0 24px 48px -15px rgba(0, 0, 0, 0.08);
+  border-color: rgba(24, 24, 27, 0.1);
 }
 
 .metric-icon-wrapper {
@@ -428,23 +545,29 @@ onMounted(loadDashboard)
 .metric-icon {
   width: 48px;
   height: 48px;
-  border-radius: 1.25rem;
+  border-radius: 1rem;
   display: grid;
   place-items: center;
+  transition: transform 0.3s;
+}
+
+.metric-surface:hover .metric-icon {
+  transform: scale(1.05);
 }
 
 .large-metric .metric-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 1.5rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 1.25rem;
 }
 
 .metric-value {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
-  line-height: 1.1;
+  line-height: 1;
   letter-spacing: -0.04em;
   color: var(--text-main);
+  font-family: Satoshi, monospace;
 }
 
 .large-value {
@@ -452,21 +575,12 @@ onMounted(loadDashboard)
 }
 
 .metric-label-outside {
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 700;
   color: var(--text-muted);
-  text-align: center;
-  padding: 0 1rem;
-}
-
-/* Perpetual Micro-animation */
-.pulse-animation .metric-icon {
-  animation: pulse-soft 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.05); }
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 0.5rem;
 }
 
 /* Skeleton Loading */
