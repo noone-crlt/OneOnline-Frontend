@@ -464,7 +464,7 @@ onMounted(() => {
                   </label>
 
                   <div class="addr-form-buttons">
-                    <button class="btn btn-primary btn-save-profile" type="submit" :disabled="isAddressSaving">
+                    <button class="btn btn-primary btn-save-addr" type="submit" :disabled="isAddressSaving">
                       {{ isAddressSaving ? 'Đang lưu...' : (editingAddressId ? 'Cập nhật' : 'Thêm địa chỉ') }}
                     </button>
                     <button class="btn btn-secondary btn-cancel-addr" type="button" @click="resetAddressForm">Hủy</button>
@@ -1159,11 +1159,16 @@ onMounted(() => {
   align-items: center;
 }
 
+.btn-save-addr,
 .btn-cancel-addr {
   padding: 0.8rem 1.6rem;
   font-size: 0.9rem;
   font-weight: 600;
   height: auto;
+}
+
+.btn-save-addr {
+  width: max-content;
 }
 
 /* RESPONSIVE LAYOUT */
