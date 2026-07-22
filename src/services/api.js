@@ -259,6 +259,29 @@ export function getCategories() {
   return apiFetch('/api/categories')
 }
 
+export function createAdminCategory(data) {
+  return apiFetch('/api/categories', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: data,
+  })
+}
+
+export function updateAdminCategory(categoryId, data) {
+  return apiFetch(`/api/categories/${categoryId}`, {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: data,
+  })
+}
+
+export function deleteAdminCategory(categoryId) {
+  return apiFetch(`/api/categories/${categoryId}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+}
+
 export function getBookBySlug(slug, init = {}) {
   return apiFetch(`/api/books/${slug}`, init)
 }
