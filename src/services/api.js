@@ -284,26 +284,27 @@ export function getAdminBookFormOptions() {
   return apiFetch('/api/admin/books/form-options', { headers: authHeaders() })
 }
 
-function buildBookFormData(data, coverFile) {
+function buildBookFormData(data, coverFile, pdfFile) {
   const formData = new FormData()
   formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }))
   if (coverFile) formData.append('coverFile', coverFile)
+  if (pdfFile) formData.append('pdfFile', pdfFile)
   return formData
 }
 
-export function createAdminBook(data, coverFile) {
+export function createAdminBook(data, coverFile, pdfFile) {
   return apiFetch('/api/admin/books', {
     method: 'POST',
     headers: authHeaders(),
-    body: buildBookFormData(data, coverFile),
+    body: buildBookFormData(data, coverFile, pdfFile),
   })
 }
 
-export function updateAdminBook(bookId, data, coverFile) {
+export function updateAdminBook(bookId, data, coverFile, pdfFile) {
   return apiFetch(`/api/admin/books/${bookId}`, {
     method: 'PUT',
     headers: authHeaders(),
-    body: buildBookFormData(data, coverFile),
+    body: buildBookFormData(data, coverFile, pdfFile),
   })
 }
 

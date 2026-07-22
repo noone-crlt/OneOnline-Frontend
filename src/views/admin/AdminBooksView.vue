@@ -33,6 +33,8 @@ const coverFile = ref(null)
 const coverPreview = ref('')
 const failedCoverIds = ref(new Set())
 const formOptions = ref({ publishers: [], authors: [], categories: [] })
+const pdfFile = ref(null)
+const pdfFileName = ref('')
 let searchTimer = null
 
 const pageSize = 10
@@ -47,6 +49,8 @@ const form = reactive({
   authorIds: [],
   categoryIds: [],
   isActive: true,
+  ebookOriginalPrice: '',
+  ebookSalePrice: '',
 })
 
 function clearMessages() {
@@ -82,10 +86,14 @@ function resetForm() {
     authorIds: [],
     categoryIds: [],
     isActive: true,
+    ebookOriginalPrice: '',
+    ebookSalePrice: '',
   })
   editingBookId.value = null
   coverFile.value = null
   coverPreview.value = ''
+  pdfFile.value = null
+  pdfFileName.value = ''
 }
 
 async function loadBooks() {
@@ -143,9 +151,13 @@ async function openEditModal(bookId) {
       authorIds: (book.authorIds ?? []).map(String),
       categoryIds: (book.categoryIds ?? []).map(String),
       isActive: Boolean(book.isActive),
+      ebookOriginalPrice: book.ebookOriginalPrice != null ? String(book.ebookOriginalPrice) : '',
+      ebookSalePrice: book.ebookSalePrice != null ? String(book.ebookSalePrice) : '',
     })
     coverFile.value = null
     coverPreview.value = book.imageUrls?.[0] ? getFileUrl(book.imageUrls[0]) : ''
+    pdfFile.value = null
+    pdfFileName.value = book.pdfFileName || ''
     isModalOpen.value = true
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Không thể tải thông tin sách.'
@@ -173,6 +185,20 @@ function handleCoverChange(event) {
   coverPreview.value = URL.createObjectURL(file)
 }
 
+function handlePdfChange(event) {
+  const [file] = event.target.files ?? []
+  if (!file) return
+
+  if (file.type !== 'application/pdf') {
+    errorMessage.value = 'File tài liệu phải có định dạng PDF.'
+    event.target.value = ''
+    return
+  }
+
+  pdfFile.value = file
+  pdfFileName.value = file.name
+}
+
 function buildPayload() {
   return {
     title: form.title.trim(),
@@ -182,6 +208,8 @@ function buildPayload() {
     authorIds: form.authorIds.map(Number),
     categoryIds: form.categoryIds.map(Number),
     isActive: form.isActive,
+    ebookOriginalPrice: form.ebookOriginalPrice ? Number(form.ebookOriginalPrice) : null,
+    ebookSalePrice: form.ebookSalePrice ? Number(form.ebookSalePrice) : null,
   }
 }
 
@@ -192,10 +220,10 @@ async function saveBook() {
   try {
     const payload = buildPayload()
     if (editingBookId.value) {
-      await updateAdminBook(editingBookId.value, payload, coverFile.value)
+      await updateAdminBook(editingBookId.value, payload, coverFile.value, pdfFile.value)
       successMessage.value = 'Cập nhật sách thành công.'
     } else {
-      await createAdminBook(payload, coverFile.value)
+      await createAdminBook(payload, coverFile.value, pdfFile.value)
       successMessage.value = 'Tạo sách thành công.'
     }
     isModalOpen.value = false
@@ -409,6 +437,21 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
               <option v-for="category in formOptions.categories" :key="category.id" :value="String(category.id)">{{ category.name }}</option>
             </select>
             <small>Giữ Ctrl hoặc Cmd để chọn nhiều thể loại.</small>
+          </label>
+          <label>
+            Giá bán Ebook (đ)
+            <input type="number" v-model="form.ebookSalePrice" min="0" placeholder="Ví dụ: 99000" />
+          </label>
+          <label>
+            Giá gốc Ebook (đ)
+            <input type="number" v-model="form.ebookOriginalPrice" min="0" placeholder="Ví dụ: 129000" />
+          </label>
+          <label class="full-width">
+            File PDF Ebook {{ editingBookId ? '(tùy chọn)' : '' }}
+            <input type="file" accept="application/pdf" @change="handlePdfChange" />
+            <small v-if="pdfFileName" style="display: block; margin-top: 0.25rem; color: #16a34a;">
+              File hiện tại: {{ pdfFileName }}
+            </small>
           </label>
           <label class="full-width">
             Ảnh bìa {{ editingBookId ? '(tùy chọn)' : '' }}
