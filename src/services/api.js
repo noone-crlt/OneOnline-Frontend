@@ -11,7 +11,7 @@ export class ApiError extends Error {
 // Khi cần dùng backend local, đặt VITE_API_BASE_URL=http://localhost:8080 trong .env.local.
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ??
-  'https://book-area-api-l4hkavao3q-as.a.run.app'
+  'https://book-area-api-313942406394.asia-southeast1.run.app'
 const MINIO_BASE_URL = 
   import.meta.env.VITE_MINIO_URL ?? 
   'https://minio1.webtui.vn:9000'
@@ -429,7 +429,8 @@ export function getFileUrl(path) {
     cleanPath = `sach/${cleanPath.substring('book/'.length)}`
   }
 
-  return `${MINIO_BASE_URL}/book-area-files/${cleanPath}`
+  const bucketName = import.meta.env.VITE_MINIO_BUCKET ?? 'bucket-oneonline'
+  return `${MINIO_BASE_URL}/${bucketName}/${cleanPath}`
 }
 
 export function getFeaturedCategories() {
