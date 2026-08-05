@@ -2,17 +2,16 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
-  searchOutline,
-  bookOutline,
-  headsetOutline,
-  documentTextOutline,
-  optionsOutline,
-  chevronBackOutline,
-  chevronForwardOutline,
-  arrowForwardOutline,
-  cartOutline
-} from 'ionicons/icons'
-import IonIcon from '../components/common/IonIcon.vue'
+  PhMagnifyingGlass,
+  PhBookOpen,
+  PhHeadphones,
+  PhBookBookmark,
+  PhSlidersHorizontal,
+  PhCaretLeft,
+  PhCaretRight,
+  PhArrowRight,
+  PhShoppingBag,
+} from '@phosphor-icons/vue'
 import TopNavbar from '../components/layout/TopNavbar.vue'
 import AppFooter from '../components/layout/AppFooter.vue'
 import { getBookCatalog, getCategories, getFileUrl } from '../services/api'
@@ -212,7 +211,7 @@ onMounted(async () => {
 
           <!-- Search Bar -->
           <div class="search-wrapper">
-            <IonIcon :icon="searchOutline" :size="20" class="search-icon" />
+            <PhMagnifyingGlass :size="20" class="search-icon" />
             <input
               v-model="searchQuery"
               type="text"
@@ -264,7 +263,7 @@ onMounted(async () => {
                 aria-label="Cuộn sang trái"
                 @click="scrollCategories(-1)"
               >
-                <IonIcon :icon="chevronBackOutline" :size="15" />
+                <PhCaretLeft :size="15" weight="bold" />
               </button>
 
               <div ref="categoryChipsRef" class="category-chips">
@@ -295,7 +294,7 @@ onMounted(async () => {
                 aria-label="Cuộn sang phải"
                 @click="scrollCategories(1)"
               >
-                <IonIcon :icon="chevronForwardOutline" :size="15" />
+                <PhCaretRight :size="15" weight="bold" />
               </button>
             </div>
           </div>
@@ -326,7 +325,7 @@ onMounted(async () => {
 
         <!-- Empty Results -->
         <div v-else-if="processedBooks.length === 0" class="empty-state">
-          <div class="empty-icon"><IonIcon :icon="bookOutline" :size="48" /></div>
+          <div class="empty-icon"><PhBookOpen :size="48" weight="duotone" /></div>
           <h3>Không tìm thấy cuốn sách nào</h3>
           <p>Hãy thử thay đổi từ khóa tìm kiếm hoặc bỏ chọn các bộ lọc hiện tại.</p>
           <button type="button" class="reset-filter-btn" @click="searchQuery = ''; selectedCategory = ''; selectedFormat = ''; loadCatalog()">
@@ -372,7 +371,7 @@ onMounted(async () => {
                 <span class="book-price">{{ book.formattedPrice }}</span>
                 <button type="button" class="detail-btn" @click.stop="viewBookDetail(book.slug)">
                   <span>Xem chi tiết</span>
-                  <IonIcon :icon="arrowForwardOutline" :size="14" />
+                  <PhArrowRight :size="14" weight="bold" />
                 </button>
               </div>
             </div>
@@ -387,7 +386,7 @@ onMounted(async () => {
             :disabled="currentPage === 0"
             @click="changePage(currentPage - 1)"
           >
-            <IonIcon :icon="chevronBackOutline" :size="16" />
+            <PhCaretLeft :size="16" />
             <span>Trang trước</span>
           </button>
 
@@ -411,7 +410,7 @@ onMounted(async () => {
             @click="changePage(currentPage + 1)"
           >
             <span>Trang sau</span>
-            <IonIcon :icon="chevronForwardOutline" :size="16" />
+            <PhCaretRight :size="16" />
           </button>
         </div>
       </section>

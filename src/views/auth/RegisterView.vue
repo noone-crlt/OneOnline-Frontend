@@ -1,19 +1,18 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  arrowBackOutline,
-  mailOutline,
-  lockClosedOutline,
-  personOutline,
-  eyeOutline,
-  eyeOffOutline,
-  personAddOutline,
-  bookOutline,
-  sparklesOutline,
-  alertCircleOutline,
-} from 'ionicons/icons'
-import IonIcon from '../../components/common/IonIcon.vue'
+import { 
+  ArrowLeft, 
+  Mail, 
+  Lock, 
+  User, 
+  Eye, 
+  EyeOff, 
+  UserPlus, 
+  BookOpen, 
+  Sparkles, 
+  AlertCircle 
+} from 'lucide-vue-next'
 
 import { register } from '../../stores/auth'
 
@@ -101,7 +100,7 @@ async function handleSubmit() {
             <div class="form-group">
               <label for="fullName">Họ và tên</label>
               <div class="input-wrapper">
-                <IonIcon :icon="personOutline" :size="18" class="input-icon" />
+                <User :size="18" class="input-icon" />
                 <input
                   id="fullName"
                   v-model="form.fullName"
@@ -116,7 +115,7 @@ async function handleSubmit() {
             <div class="form-group">
               <label for="email">Địa chỉ Email</label>
               <div class="input-wrapper">
-                <IonIcon :icon="mailOutline" :size="18" class="input-icon" />
+                <Mail :size="18" class="input-icon" />
                 <input
                   id="email"
                   v-model="form.email"
@@ -132,7 +131,7 @@ async function handleSubmit() {
               <div class="form-group">
                 <label for="password">Mật khẩu</label>
                 <div class="input-wrapper">
-                  <IonIcon :icon="lockClosedOutline" :size="18" class="input-icon" />
+                  <Lock :size="18" class="input-icon" />
                   <input
                     id="password"
                     v-model="form.password"
@@ -147,15 +146,15 @@ async function handleSubmit() {
                     @click="showPassword = !showPassword"
                     tabindex="-1"
                   >
-                    <IonIcon v-if="showPassword" :icon="eyeOffOutline" :size="18" />
-                    <IonIcon v-else :icon="eyeOutline" :size="18" />
+                    <EyeOff v-if="showPassword" :size="18" />
+                    <Eye v-else :size="18" />
                   </button>
                 </div>
               </div>
               <div class="form-group">
                 <label for="confirmPassword">Xác nhận</label>
                 <div class="input-wrapper">
-                  <IonIcon :icon="lockClosedOutline" :size="18" class="input-icon" />
+                  <Lock :size="18" class="input-icon" />
                   <input
                     id="confirmPassword"
                     v-model="form.confirmPassword"
@@ -170,15 +169,15 @@ async function handleSubmit() {
                     @click="showConfirmPassword = !showConfirmPassword"
                     tabindex="-1"
                   >
-                    <IonIcon v-if="showConfirmPassword" :icon="eyeOffOutline" :size="18" />
-                    <IonIcon v-else :icon="eyeOutline" :size="18" />
+                    <EyeOff v-if="showConfirmPassword" :size="18" />
+                    <Eye v-else :size="18" />
                   </button>
                 </div>
               </div>
             </div>
 
             <div v-if="errorMessage" class="alert alert-error">
-              <IonIcon :icon="alertCircleOutline" :size="18" />
+              <AlertCircle :size="18" />
               <span>{{ errorMessage }}</span>
             </div>
 
@@ -186,7 +185,7 @@ async function handleSubmit() {
               <span v-if="isSubmitting" class="spinner"></span>
               <template v-else>
                 <span>Đăng ký ngay</span>
-                <IonIcon :icon="personAddOutline" :size="18" />
+                <UserPlus :size="18" />
               </template>
             </button>
           </form>
@@ -204,14 +203,14 @@ async function handleSubmit() {
         <div class="visual-content">
           <div class="visual-top">
             <RouterLink class="back-link" to="/">
-              <IonIcon :icon="arrowBackOutline" :size="18" />
+              <ArrowLeft :size="18" />
               <span>Về trang chủ</span>
             </RouterLink>
           </div>
 
           <div class="visual-center">
             <div class="brand-badge">
-              <IonIcon :icon="bookOutline" :size="20" class="brand-icon" />
+              <BookOpen :size="20" class="brand-icon" />
               <span>OneOnline</span>
             </div>
             <h1 class="visual-title">Hành trình đọc sách bắt đầu từ đây</h1>
@@ -221,7 +220,7 @@ async function handleSubmit() {
           <div class="visual-bottom">
             <div class="quote-glass-card">
               <div class="quote-header">
-                <IonIcon :icon="sparklesOutline" :size="16" class="sparkle-icon" />
+                <Sparkles :size="16" class="sparkle-icon" />
                 <span>Quyền lợi thành viên</span>
               </div>
               <p class="quote-text">Đọc thử miễn phí, tích điểm ưu đãi và đồng bộ thư viện đọc trên mọi thiết bị.</p>

@@ -1,21 +1,20 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import {
-  searchOutline,
-  addOutline,
-  pencilOutline,
-  trashOutline,
-  closeOutline,
-  eyeOutline,
-  eyeOffOutline,
-  bookOutline,
-  cloudUploadOutline,
-  chevronBackOutline,
-  chevronForwardOutline,
-  documentTextOutline,
-  imageOutline,
-} from 'ionicons/icons'
-import IonIcon from '../../components/common/IonIcon.vue'
+  PhMagnifyingGlass,
+  PhPlus,
+  PhPencilSimple,
+  PhTrash,
+  PhX,
+  PhEye,
+  PhEyeSlash,
+  PhBooks,
+  PhUploadSimple,
+  PhCaretLeft,
+  PhCaretRight,
+  PhFileText,
+  PhImage,
+} from '@phosphor-icons/vue'
 import {
   createAdminBook,
   deleteAdminBook,
@@ -408,7 +407,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
         </p>
       </div>
       <button class="primary-btn" @click="openCreateModal">
-        <IonIcon :icon="addOutline" :size="18" />
+        <PhPlus :size="18" weight="bold" />
         <span>Thêm sách mới</span>
       </button>
     </header>
@@ -417,7 +416,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
     <div class="stats-row">
       <div class="stat-card">
         <div class="stat-icon">
-          <IonIcon :icon="bookOutline" :size="22" />
+          <PhBooks :size="22" weight="duotone" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ bookStats.total }}</span>
@@ -426,7 +425,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
       </div>
       <div class="stat-card stat-active">
         <div class="stat-icon active">
-          <IonIcon :icon="eyeOutline" :size="22" />
+          <PhEye :size="22" weight="duotone" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ bookStats.active }}</span>
@@ -435,7 +434,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
       </div>
       <div class="stat-card stat-hidden">
         <div class="stat-icon hidden-icon">
-          <IonIcon :icon="eyeOffOutline" :size="22" />
+          <PhEyeSlash :size="22" weight="duotone" />
         </div>
         <div class="stat-info">
           <span class="stat-value">{{ bookStats.inactive }}</span>
@@ -447,7 +446,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
     <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-box">
-        <IonIcon :icon="searchOutline" :size="18" class="search-icon" />
+        <PhMagnifyingGlass :size="18" class="search-icon" />
         <input type="text" v-model="searchQuery" placeholder="Tìm kiếm theo tên sách, tác giả..." />
       </div>
       <div class="filter-actions">
@@ -536,7 +535,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
             </div>
             <div class="col-actions">
               <button class="action-btn edit-btn" @click="openEditModal(book.id)" title="Chỉnh sửa">
-                <IonIcon :icon="pencilOutline" :size="16" />
+                <PhPencilSimple :size="16" />
               </button>
               <button
                 class="action-btn"
@@ -544,15 +543,15 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
                 @click="toggleBookStatus(book)"
                 :title="book.isActive ? 'Ẩn sách' : 'Hiển thị lại'"
               >
-                <IonIcon v-if="book.isActive" :icon="eyeOffOutline" :size="16" />
-                <IonIcon v-else :icon="eyeOutline" :size="16" />
+                <PhEyeSlash v-if="book.isActive" :size="16" />
+                <PhEye v-else :size="16" />
               </button>
               <button
                 class="action-btn delete-btn"
                 @click="deleteBookItem(book)"
                 title="Xóa sách"
               >
-                <IonIcon :icon="trashOutline" :size="16" />
+                <PhTrash :size="16" />
               </button>
             </div>
           </div>
@@ -560,7 +559,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
 
         <!-- Empty State -->
         <div v-if="!isLoading && books.length === 0" class="empty-state">
-          <IonIcon :icon="bookOutline" :size="48" class="empty-icon" />
+          <PhBooks :size="48" weight="thin" class="empty-icon" />
           <p class="empty-title">Không tìm thấy sách</p>
           <p class="empty-desc">{{ errorMessage || 'Thử thay đổi bộ lọc hoặc thêm sách mới.' }}</p>
         </div>
@@ -574,7 +573,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
       </span>
       <div class="page-buttons">
         <button class="page-btn" :disabled="currentPage === 0 || isLoading" @click="changePage(currentPage - 1)">
-          <IonIcon :icon="chevronBackOutline" :size="16" />
+          <PhCaretLeft :size="16" />
         </button>
         <button
           v-for="page in visiblePageNumbers"
@@ -587,7 +586,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
           {{ page + 1 }}
         </button>
         <button class="page-btn" :disabled="currentPage + 1 >= totalPages || isLoading" @click="changePage(currentPage + 1)">
-          <IonIcon :icon="chevronForwardOutline" :size="16" />
+          <PhCaretRight :size="16" />
         </button>
       </div>
     </div>
@@ -600,8 +599,8 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
             <header class="modal-header">
               <div class="modal-header-left">
                 <div class="modal-icon">
-                  <IonIcon v-if="!editingBookId" :icon="addOutline" :size="20" />
-                  <IonIcon v-else :icon="pencilOutline" :size="20" />
+                  <PhPlus v-if="!editingBookId" :size="20" />
+                  <PhPencilSimple v-else :size="20" />
                 </div>
                 <div>
                   <h3>{{ modalTitle }}</h3>
@@ -609,7 +608,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
                 </div>
               </div>
               <button class="modal-close-btn" type="button" title="Đóng" @click="closeModal">
-                <IonIcon :icon="closeOutline" :size="20" />
+                <PhX :size="20" />
               </button>
             </header>
 
@@ -702,11 +701,11 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
                   <!-- PDF Upload -->
                   <label class="form-field full-span upload-field">
                     <span class="field-label">
-                      <IonIcon :icon="documentTextOutline" :size="16" />
+                      <PhFileText :size="16" />
                       File PDF Ebook {{ editingBookId ? '(tùy chọn)' : '' }}
                     </span>
                     <div class="upload-zone" :class="{ 'has-file': pdfFileName }">
-                      <IonIcon :icon="cloudUploadOutline" :size="22" class="upload-icon" />
+                      <PhUploadSimple :size="22" class="upload-icon" />
                       <span v-if="pdfFileName" class="existing-file-text">
                         📄 <strong>File PDF hiện có:</strong> {{ pdfFileName }}
                         <br /><small class="change-hint">(Nhấn hoặc kéo thả file mới để thay thế)</small>
@@ -719,11 +718,11 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
                   <!-- Cover Upload -->
                   <label class="form-field full-span upload-field">
                     <span class="field-label">
-                      <IonIcon :icon="imageOutline" :size="16" />
+                      <PhImage :size="16" />
                       Ảnh bìa {{ editingBookId ? '(tùy chọn)' : '' }}
                     </span>
                     <div class="upload-zone" :class="{ 'has-file': coverPreview }">
-                      <IonIcon :icon="cloudUploadOutline" :size="22" class="upload-icon" />
+                      <PhUploadSimple :size="22" class="upload-icon" />
                       <span v-if="coverPreview" class="existing-file-text">
                         🖼️ <strong>Ảnh bìa đã chọn / có trong hệ thống</strong>
                         <br /><small class="change-hint">(Nhấn hoặc kéo thả ảnh mới để thay thế)</small>

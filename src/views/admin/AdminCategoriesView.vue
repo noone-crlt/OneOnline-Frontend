@@ -1,16 +1,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import {
-  searchOutline,
-  addOutline,
-  pencilOutline,
-  trashOutline,
-  bookmarkOutline,
-  bookOutline,
-  trophyOutline,
-  closeOutline,
-} from 'ionicons/icons'
-import IonIcon from '../../components/common/IonIcon.vue'
+  PhMagnifyingGlass,
+  PhPlus,
+  PhPencilSimple,
+  PhTrash,
+  PhBookmarkSimple,
+  PhBooks,
+  PhTrophy,
+  PhX,
+} from '@phosphor-icons/vue'
 import {
   getCategories,
   createAdminCategory,
@@ -141,7 +140,7 @@ onMounted(() => {
         <p>Phân loại và tổ chức các tác phẩm theo thể loại.</p>
       </div>
       <button class="primary-btn" @click="openCreateModal">
-        <IonIcon :icon="addOutline" :size="20" />
+        <PhPlus :size="20" weight="bold" />
         Thêm danh mục
       </button>
     </header>
@@ -150,7 +149,7 @@ onMounted(() => {
     <div class="category-kpi-bar bento-item">
       <div class="category-kpi-card">
         <div class="kpi-icon-pill" style="color: #ec4899; background-color: rgba(236, 72, 153, 0.12);">
-          <IonIcon :icon="bookmarkOutline" :size="20" />
+          <PhBookmarkSimple :size="20" weight="duotone" />
         </div>
         <div class="kpi-info">
           <span class="kpi-title">TỔNG DANH MỤC</span>
@@ -160,7 +159,7 @@ onMounted(() => {
 
       <div class="category-kpi-card">
         <div class="kpi-icon-pill" style="color: #6366f1; background-color: rgba(99, 102, 241, 0.12);">
-          <IonIcon :icon="bookOutline" :size="20" />
+          <PhBooks :size="20" weight="duotone" />
         </div>
         <div class="kpi-info">
           <span class="kpi-title">SÁCH ĐÃ PHÂN LOẠI</span>
@@ -170,7 +169,7 @@ onMounted(() => {
 
       <div class="category-kpi-card">
         <div class="kpi-icon-pill" style="color: #f59e0b; background-color: rgba(245, 158, 11, 0.12);">
-          <IonIcon :icon="trophyOutline" :size="20" />
+          <PhTrophy :size="20" weight="duotone" />
         </div>
         <div class="kpi-info">
           <span class="kpi-title">DANH MỤC NHIỀU SÁCH NHẤT</span>
@@ -182,7 +181,7 @@ onMounted(() => {
     <!-- Toolbar -->
     <div class="toolbar bento-item">
       <div class="search-box">
-        <IonIcon :icon="searchOutline" :size="20" class="search-icon" />
+        <PhMagnifyingGlass :size="20" class="search-icon" />
         <input type="text" v-model="searchQuery" placeholder="Tìm kiếm danh mục..." />
       </div>
     </div>
@@ -208,7 +207,7 @@ onMounted(() => {
           </div>
           <div class="flex-2">
             <div class="category-name">
-              <IonIcon :icon="bookmarkOutline" :size="20" color="#ec4899" />
+              <PhBookmarkSimple :size="20" color="#ec4899" weight="duotone" />
               <strong>{{ category.name }}</strong>
             </div>
           </div>
@@ -221,10 +220,10 @@ onMounted(() => {
           <div class="actions-col" style="width: 100px; justify-content: flex-end;">
             <div class="action-buttons">
               <button class="icon-btn edit magnetic-btn" @click="openEditModal(category)" title="Chỉnh sửa">
-                <IonIcon :icon="pencilOutline" :size="18" />
+                <PhPencilSimple :size="18" />
               </button>
               <button class="icon-btn danger magnetic-btn" @click="handleDeleteCategory(category.id)" title="Xóa">
-                <IonIcon :icon="trashOutline" :size="18" />
+                <PhTrash :size="18" />
               </button>
             </div>
           </div>
@@ -244,7 +243,7 @@ onMounted(() => {
             <h3>{{ modalTitle }}</h3>
             <p>Thông tin có dấu * là bắt buộc.</p>
           </div>
-          <button class="icon-btn" type="button" title="Đóng" @click="closeModal"><IonIcon :icon="closeOutline" :size="22" /></button>
+          <button class="icon-btn" type="button" title="Đóng" @click="closeModal"><PhX :size="22" /></button>
         </header>
 
         <form class="category-form" @submit.prevent="saveCategory">

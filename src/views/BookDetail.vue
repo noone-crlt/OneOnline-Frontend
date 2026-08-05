@@ -2,19 +2,18 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  arrowBackOutline,
-  star,
-  starOutline,
-  shareSocialOutline,
-  bookOutline,
-  documentTextOutline,
-  headsetOutline,
-  cartOutline,
-  flash,
-  checkmarkCircleOutline,
-  chatbubbleEllipsesOutline
-} from 'ionicons/icons'
-import IonIcon from '../components/common/IonIcon.vue'
+  PhBookOpen,
+  PhShoppingCartSimple,
+  PhLightning,
+  PhStar,
+  PhCheckCircle,
+  PhBookBookmark,
+  PhFilePdf,
+  PhHeadphones,
+  PhShareNetwork,
+  PhArrowLeft,
+  PhChatCircleText
+} from '@phosphor-icons/vue'
 import { addCartItem, getBookBySlug, getFileUrl } from '../services/api'
 import { toast } from 'vue-sonner'
 import TopNavbar from '../components/layout/TopNavbar.vue'
@@ -86,11 +85,11 @@ function formatFormatName(format) {
 
 function getFormatIconComponent(format) {
   switch (format) {
-    case 'PHYSICAL': return bookOutline
-    case 'EBOOK_PDF': return documentTextOutline
-    case 'EBOOK_EPUB': return bookOutline
-    case 'AUDIOBOOK': return headsetOutline
-    default: return bookOutline
+    case 'PHYSICAL': return PhBookBookmark
+    case 'EBOOK_PDF': return PhFilePdf
+    case 'EBOOK_EPUB': return PhBookOpen
+    case 'AUDIOBOOK': return PhHeadphones
+    default: return PhBookOpen
   }
 }
 
@@ -220,7 +219,7 @@ onMounted(() => {
         <!-- Breadcrumb navigation -->
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <button type="button" class="back-btn" @click="router.back()" title="Quay lại">
-            <IonIcon :icon="arrowBackOutline" :size="16" />
+            <PhArrowLeft :size="16" />
           </button>
           <RouterLink to="/">Trang chủ</RouterLink>
           <span class="sep">/</span>
@@ -249,7 +248,7 @@ onMounted(() => {
             </div>
 
             <button type="button" class="share-btn" @click="copyShareLink" title="Chia sẻ tác phẩm">
-              <IonIcon :icon="shareSocialOutline" :size="16" />
+              <PhShareNetwork :size="16" />
               <span>Chia sẻ tác phẩm này</span>
             </button>
           </div>
@@ -260,7 +259,7 @@ onMounted(() => {
               <div class="publisher-row">
                 <span class="publisher-kicker">{{ book.publisherName || 'NXB Tri Thức Online' }}</span>
                 <span class="rating-badge">
-                  <IonIcon :icon="star" :size="14" class="star-icon" />
+                  <PhStar :size="14" weight="fill" class="star-icon" />
                   <strong>4.9</strong> ({{ reviews.length }} đánh giá)
                 </span>
               </div>
@@ -285,7 +284,7 @@ onMounted(() => {
                   :class="['format-card-btn', { active: selectedEditionIndex === idx }]"
                   @click="selectEdition(idx)"
                 >
-                  <IonIcon :icon="getFormatIconComponent(ed.format)" :size="20" class="format-icon" />
+                  <component :is="getFormatIconComponent(ed.format)" :size="20" class="format-icon" />
                   <div class="format-text-wrap">
                     <span class="format-name">{{ formatFormatName(ed.format) }}</span>
                     <span class="format-price-tag">{{ formatPrice(ed.salePrice) }}</span>
@@ -306,7 +305,7 @@ onMounted(() => {
                 </span>
               </div>
               <div class="availability-status">
-                <IonIcon :icon="checkmarkCircleOutline" :size="16" class="check-icon" />
+                <PhCheckCircle :size="16" class="check-icon" />
                 <span>{{ getStockLabel(selectedEdition) }}</span>
               </div>
             </div>
@@ -318,7 +317,7 @@ onMounted(() => {
                 @click="buyNow" 
                 :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
               >
-                <IonIcon :icon="flash" :size="18" />
+                <PhLightning :size="18" weight="fill" />
                 <span>Mua ngay</span>
               </button>
               <button 
@@ -326,7 +325,7 @@ onMounted(() => {
                 @click="addToCart" 
                 :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
               >
-                <IonIcon :icon="cartOutline" :size="18" />
+                <PhShoppingCartSimple :size="18" />
                 <span>Thêm vào giỏ</span>
               </button>
               <button 
@@ -334,7 +333,7 @@ onMounted(() => {
                 class="btn-cta btn-read-sample" 
                 @click="readSample"
               >
-                <IonIcon :icon="bookOutline" :size="18" />
+                <PhBookOpen :size="18" />
                 <span>Đọc thử</span>
               </button>
             </div>
@@ -346,7 +345,7 @@ onMounted(() => {
                   :class="['tab-title', { active: activeTab === 'description' }]" 
                   @click="activeTab = 'description'"
                 >
-                  <IonIcon :icon="bookOutline" :size="16" />
+                  <PhBookOpen :size="16" />
                   <span>Tóm tắt & Giới thiệu</span>
                 </button>
                 <button 
@@ -354,14 +353,14 @@ onMounted(() => {
                   :class="['tab-title', { active: activeTab === 'chapters' }]" 
                   @click="activeTab = 'chapters'"
                 >
-                  <IonIcon :icon="headsetOutline" :size="16" />
+                  <PhHeadphones :size="16" />
                   <span>Mục lục audio ({{ selectedEdition.audioChapters.length }})</span>
                 </button>
                 <button 
                   :class="['tab-title', { active: activeTab === 'reviews' }]" 
                   @click="activeTab = 'reviews'"
                 >
-                  <IonIcon :icon="chatbubbleEllipsesOutline" :size="16" />
+                  <PhChatCircleText :size="16" />
                   <span>Đánh giá ({{ reviews.length }})</span>
                 </button>
               </div>
@@ -389,14 +388,14 @@ onMounted(() => {
                       <span class="label">Đánh giá:</span>
                       <div class="star-rating-options">
                         <button 
-                          v-for="starIndex in 5" 
-                          :key="starIndex" 
+                          v-for="star in 5" 
+                          :key="star" 
                           type="button"
-                          :class="['star-option-btn', { active: newRating >= starIndex }]"
-                          @click="newRating = starIndex"
+                          :class="['star-option-btn', { active: newRating >= star }]"
+                          @click="newRating = star"
                           aria-label="Chọn sao"
                         >
-                          <IonIcon :icon="newRating >= starIndex ? star : starOutline" :size="18" />
+                          <PhStar :size="18" :weight="newRating >= star ? 'fill' : 'regular'" />
                         </button>
                       </div>
                     </div>
@@ -430,7 +429,7 @@ onMounted(() => {
                           <span class="review-date">{{ rev.createdAt }}</span>
                         </div>
                         <div class="review-stars">
-                          <IonIcon v-for="starIndex in 5" :key="starIndex" :icon="rev.rating >= starIndex ? star : starOutline" :size="14" class="star-icon" />
+                          <PhStar v-for="star in 5" :key="star" :size="14" :weight="rev.rating >= star ? 'fill' : 'regular'" class="star-icon" />
                         </div>
                         <p class="review-comment-text">{{ rev.comment }}</p>
                       </div>

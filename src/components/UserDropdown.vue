@@ -1,8 +1,6 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { chevronDownOutline, gridOutline, bookOutline, personOutline, logOutOutline } from 'ionicons/icons'
-import IonIcon from './common/IonIcon.vue'
 import { authIsAdmin, authUser, logout } from '../stores/auth'
 
 const router = useRouter()
@@ -69,35 +67,51 @@ onUnmounted(() => {
         <span v-if="displayEmail" class="premium-email">{{ displayEmail }}</span>
       </span>
       
-      <IonIcon :icon="chevronDownOutline" :size="16" class="premium-chevron" :class="{ 'is-open': dropdownOpen }" />
+      <svg class="premium-chevron" :class="{ 'is-open': dropdownOpen }" viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
     </button>
 
     <transition name="dropdown-fade">
       <ul v-if="dropdownOpen" class="premium-dropdown__menu">
         <li v-if="authIsAdmin">
           <button type="button" class="premium-item" @click="navigateTo('/admin')">
-            <IonIcon :icon="gridOutline" :size="16" class="premium-icon" />
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="premium-icon">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
             Dashboard / Admin
           </button>
         </li>
 
         <li>
           <button type="button" class="premium-item" @click="navigateTo('/my-library')">
-            <IonIcon :icon="bookOutline" :size="16" class="premium-icon" />
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="premium-icon">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+            </svg>
             Thư viện của tôi
           </button>
         </li>
 
         <li>
           <button type="button" class="premium-item" @click="navigateTo('/profile')">
-            <IonIcon :icon="personOutline" :size="16" class="premium-icon" />
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="premium-icon">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
             Thông tin cá nhân
           </button>
         </li>
         <li><hr class="premium-divider"></li>
         <li>
           <button type="button" class="premium-item premium-item--danger" @click="handleLogout">
-            <IonIcon :icon="logOutOutline" :size="16" class="premium-icon" />
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" class="premium-icon">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
             Đăng xuất
           </button>
         </li>

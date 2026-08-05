@@ -1,14 +1,13 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import {
-  searchOutline,
-  lockClosedOutline,
-  checkmarkCircleOutline,
-  chevronBackOutline,
-  chevronForwardOutline,
-  personOutline,
-} from 'ionicons/icons'
-import IonIcon from '../../components/common/IonIcon.vue'
+  PhMagnifyingGlass,
+  PhLockKey,
+  PhCheckCircle,
+  PhCaretLeft,
+  PhCaretRight,
+  PhUser,
+} from '@phosphor-icons/vue'
 import { getAdminUsers, toggleBanAdminUser } from '../../services/api'
 import notify, { confirmDialog, promptDialog } from '../../services/toast'
 
@@ -141,7 +140,7 @@ onMounted(() => {
     <!-- Toolbar -->
     <div class="toolbar bento-item">
       <div class="search-box">
-        <IonIcon :icon="searchOutline" :size="20" class="search-icon" />
+        <PhMagnifyingGlass :size="20" class="search-icon" />
         <input
           type="text"
           v-model="searchQuery"
@@ -214,15 +213,15 @@ onMounted(() => {
                   @click="handleToggleBan(user)"
                   :title="user.status === 'BANNED' ? 'Gỡ khóa tài khoản' : 'Khóa tài khoản'"
                 >
-                  <IonIcon v-if="user.status === 'BANNED'" :icon="checkmarkCircleOutline" :size="18" />
-                  <IonIcon v-else :icon="lockClosedOutline" :size="18" />
+                  <PhCheckCircle v-if="user.status === 'BANNED'" :size="18" />
+                  <PhLockKey v-else :size="18" />
                 </button>
               </div>
             </td>
           </tr>
           <tr v-if="!isLoading && users.length === 0">
             <td colspan="7" class="empty-state">
-              <IonIcon :icon="personOutline" :size="40" class="empty-icon" />
+              <PhUser :size="40" class="empty-icon" />
               <p>Không tìm thấy người dùng phù hợp.</p>
             </td>
           </tr>
@@ -237,7 +236,7 @@ onMounted(() => {
       </span>
       <div class="page-buttons">
         <button class="page-btn" :disabled="currentPage === 0 || isLoading" @click="changePage(currentPage - 1)">
-          <IonIcon :icon="chevronBackOutline" :size="16" />
+          <PhCaretLeft :size="16" />
         </button>
         <button
           v-for="p in totalPages"
@@ -250,7 +249,7 @@ onMounted(() => {
           {{ p }}
         </button>
         <button class="page-btn" :disabled="currentPage + 1 >= totalPages || isLoading" @click="changePage(currentPage + 1)">
-          <IonIcon :icon="chevronForwardOutline" :size="16" />
+          <PhCaretRight :size="16" />
         </button>
       </div>
     </div>
