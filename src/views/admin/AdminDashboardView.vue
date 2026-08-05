@@ -2,7 +2,18 @@
 import { computed, onMounted, ref, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import gsap from 'gsap'
-import { PhUsers, PhBooks, PhBookOpenText, PhBookmarkSimple, PhPenNib, PhCurrencyDollar, PhChatCircleDots, PhWarningCircle, PhArrowsClockwise } from '@phosphor-icons/vue'
+import {
+  peopleOutline,
+  bookOutline,
+  libraryOutline,
+  bookmarkOutline,
+  pencilOutline,
+  cashOutline,
+  chatbubbleEllipsesOutline,
+  alertCircleOutline,
+  refreshOutline
+} from 'ionicons/icons'
+import IonIcon from '../../components/common/IonIcon.vue'
 
 import DashboardBarChart from '../../components/admin/DashboardBarChart.vue'
 import { getDashboardSummary, getMonthlyStats, getTopSellingBooks } from '../../services/adminDashboard'
@@ -36,12 +47,12 @@ function resolveCover(url) {
 const summaryCards = computed(() => {
   const current = summary.value
   return [
-    { label: 'Tổng người dùng', value: compactNumber.format(current?.totalUsers ?? 0), icon: PhUsers, color: '#10b981' },
-    { label: 'Tổng tác phẩm', value: compactNumber.format(current?.totalBooks ?? 0), icon: PhBooks, color: '#6366f1' },
-    { label: 'Chương audio', value: compactNumber.format(current?.totalChapters ?? 0), icon: PhBookOpenText, color: '#f59e0b' },
-    { label: 'Danh mục sách', value: compactNumber.format(current?.totalCategories ?? 0), icon: PhBookmarkSimple, color: '#ec4899' },
-    { label: 'Tổng tác giả', value: compactNumber.format(current?.totalAuthors ?? 0), icon: PhPenNib, color: '#0ea5e9' },
-    { label: 'Tổng bình luận', value: compactNumber.format(current?.totalComments ?? 0), icon: PhChatCircleDots, color: '#8b5cf6' },
+    { label: 'Tổng người dùng', value: compactNumber.format(current?.totalUsers ?? 0), icon: peopleOutline, color: '#10b981' },
+    { label: 'Tổng tác phẩm', value: compactNumber.format(current?.totalBooks ?? 0), icon: bookOutline, color: '#6366f1' },
+    { label: 'Chương audio', value: compactNumber.format(current?.totalChapters ?? 0), icon: libraryOutline, color: '#f59e0b' },
+    { label: 'Danh mục sách', value: compactNumber.format(current?.totalCategories ?? 0), icon: bookmarkOutline, color: '#ec4899' },
+    { label: 'Tổng tác giả', value: compactNumber.format(current?.totalAuthors ?? 0), icon: pencilOutline, color: '#0ea5e9' },
+    { label: 'Tổng bình luận', value: compactNumber.format(current?.totalComments ?? 0), icon: chatbubbleEllipsesOutline, color: '#8b5cf6' },
   ]
 })
 
@@ -142,7 +153,7 @@ onMounted(loadDashboard)
             <strong class="kpi-value">{{ currencyNumber.format(summary?.totalRevenue ?? 0) }}</strong>
           </div>
           <div class="kpi-icon-bg">
-            <PhCurrencyDollar :size="120" weight="duotone" />
+            <IonIcon :icon="cashOutline" :size="120" />
           </div>
         </div>
       </div>
@@ -200,7 +211,7 @@ onMounted(loadDashboard)
           class="compact-metric-card bento-item"
         >
           <div class="compact-icon-box" :style="{ color: card.color, backgroundColor: `${card.color}15` }">
-            <component :is="card.icon" :size="20" weight="duotone" />
+            <IonIcon :icon="card.icon" :size="20" />
           </div>
           <div class="compact-metric-details">
             <span class="compact-metric-label">{{ card.label }}</span>

@@ -1,7 +1,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen } from 'lucide-vue-next'
+import { arrowBackOutline, arrowForwardOutline, openOutline, bookOutline } from 'ionicons/icons'
+import IonIcon from './common/IonIcon.vue'
 import { getBooks, getFileUrl } from '../services/api'
 
 const router = useRouter()
@@ -292,7 +293,7 @@ onUnmounted(() => {
           
           <div class="book-actions">
             <button class="action-btn primary" @click="viewDetail(activeBook.slug)">
-              <BookOpen class="icon" :size="18" />
+              <IonIcon :icon="bookOutline" :size="18" class="icon" />
               Xem chi tiết
             </button>
           </div>
@@ -302,16 +303,16 @@ onUnmounted(() => {
       <!-- Navigation Arrows -->
       <div class="nav-arrows" v-if="books.length > 1">
         <button class="nav-btn prev" @click="prev" :disabled="isAnimating" aria-label="Previous Book">
-          <ArrowLeft :size="24" />
+          <IonIcon :icon="arrowBackOutline" :size="24" />
         </button>
         <button class="nav-btn next" @click="next" :disabled="isAnimating" aria-label="Next Book">
-          <ArrowRight :size="24" />
+          <IonIcon :icon="arrowForwardOutline" :size="24" />
         </button>
       </div>
 
       <!-- Bottom Right Link -->
       <button class="explore-link" @click="goLibrary">
-        KHÁM PHÁ THƯ VIỆN <ArrowUpRight :size="20" class="explore-icon" />
+        KHÁM PHÁ THƯ VIỆN <IonIcon :icon="openOutline" :size="20" class="explore-icon" />
       </button>
 
     </div>

@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { cartOutline, bookOutline } from 'ionicons/icons'
+import IonIcon from '../common/IonIcon.vue'
 import { authUser, authIsAuthenticated } from '@/stores/auth'
 import { cartItemCount, fetchCartItemCount } from '@/stores/cart'
 import UserDropdown from '../UserDropdown.vue'
@@ -75,11 +77,7 @@ watch(authIsAuthenticated, () => {
       <div class="topbar-side topbar-side-right">
         <!-- E-commerce Shopping Cart -->
         <button class="nav-cart-btn" aria-label="Xem giỏ hàng" @click="router.push('/cart')">
-          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
-            <circle cx="9" cy="21" r="1"></circle>
-            <circle cx="20" cy="21" r="1"></circle>
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-          </svg>
+          <IonIcon :icon="cartOutline" :size="20" />
           <span class="cart-badge-count" v-if="cartItemCount > 0">{{ cartItemCount }}</span>
         </button>
 
@@ -88,10 +86,7 @@ watch(authIsAuthenticated, () => {
         </template>
         <template v-else>
           <RouterLink class="my-library-btn" to="/my-library" :class="{ active: route.path === '/my-library' }">
-            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-            </svg>
+            <IonIcon :icon="bookOutline" :size="18" />
             <span>Thư viện của tôi</span>
           </RouterLink>
           <UserDropdown />

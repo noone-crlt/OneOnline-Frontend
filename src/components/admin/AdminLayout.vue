@@ -2,16 +2,16 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
-  PhBooks,
-  PhBookOpenText,
-  PhBookmarkSimple,
-  PhUsers,
-  PhPenNib,
-  PhSignOut,
-  PhCaretDown,
-  PhHouse
-} from '@phosphor-icons/vue'
-
+  gridOutline,
+  bookOutline,
+  bookmarkOutline,
+  peopleOutline,
+  pencilOutline,
+  homeOutline,
+  chevronDownOutline,
+  logOutOutline,
+} from 'ionicons/icons'
+import IonIcon from '../common/IonIcon.vue'
 import { authUser, logout } from '../../stores/auth'
 
 const router = useRouter()
@@ -43,30 +43,30 @@ function toggleMenu() {
       
       <nav class="sidebar-nav bento-item">
         <RouterLink class="nav-link" active-class="active" to="/admin/dashboard">
-          <PhBookOpenText :size="20" weight="duotone" />
+          <IonIcon :icon="gridOutline" :size="20" />
           Tổng quan
         </RouterLink>
         <RouterLink class="nav-link" active-class="active" to="/admin/books">
-          <PhBooks :size="20" weight="duotone" />
+          <IonIcon :icon="bookOutline" :size="20" />
           Sách & Phiên bản
         </RouterLink>
         <RouterLink class="nav-link" active-class="active" to="/admin/categories">
-          <PhBookmarkSimple :size="20" weight="duotone" />
+          <IonIcon :icon="bookmarkOutline" :size="20" />
           Danh mục
         </RouterLink>
         <RouterLink class="nav-link" active-class="active" to="/admin/users">
-          <PhUsers :size="20" weight="duotone" />
+          <IonIcon :icon="peopleOutline" :size="20" />
           Người dùng
         </RouterLink>
         <RouterLink class="nav-link" active-class="active" to="/admin/authors">
-          <PhPenNib :size="20" weight="duotone" />
+          <IonIcon :icon="pencilOutline" :size="20" />
           Tác giả
         </RouterLink>
         
         <div class="nav-divider"></div>
         
         <RouterLink class="nav-link return-link" to="/library">
-          <PhHouse :size="20" weight="duotone" />
+          <IonIcon :icon="homeOutline" :size="20" />
           Trang chủ đọc sách
         </RouterLink>
       </nav>
@@ -78,13 +78,13 @@ function toggleMenu() {
             <strong>{{ authUser?.fullName || 'Quản trị viên' }}</strong>
             <span>{{ authUser?.email }}</span>
           </div>
-          <PhCaretDown :size="16" class="dropdown-icon" />
+          <IonIcon :icon="chevronDownOutline" :size="16" class="dropdown-icon" />
         </div>
         
         <transition name="fade">
           <div v-if="menuOpen" class="user-dropdown">
             <button class="dropdown-item danger" @click.stop="handleLogout">
-              <PhSignOut :size="18" /> Đăng xuất
+              <IonIcon :icon="logOutOutline" :size="18" /> Đăng xuất
             </button>
           </div>
         </transition>

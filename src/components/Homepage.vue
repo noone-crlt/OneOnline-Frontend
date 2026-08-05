@@ -1,7 +1,23 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Search, BookOpenText, TrendingUp, Compass, MonitorSmartphone, Baby, BrainCircuit, Languages, ShoppingCart, Eye, Star, ChevronRight, ChevronLeft, ArrowUpRight } from 'lucide-vue-next'
+import {
+  searchOutline,
+  bookOutline,
+  trendingUpOutline,
+  compassOutline,
+  hardwareChipOutline,
+  happyOutline,
+  bulbOutline,
+  languageOutline,
+  chevronBackOutline,
+  chevronForwardOutline,
+  openOutline,
+  eyeOutline,
+  star,
+  cartOutline
+} from 'ionicons/icons'
+import IonIcon from './common/IonIcon.vue'
 import AppFooter from './layout/AppFooter.vue'
 import TopNavbar from './layout/TopNavbar.vue'
 import FeaturedBooksHero from './FeaturedBooksHero.vue'
@@ -32,18 +48,18 @@ let motionContext
 let homeMotionStarted = false
 
 const categoryIcons = {
-  'văn học': BookOpenText,
-  'kinh tế': TrendingUp,
-  'kỹ năng sống': Compass,
-  'công nghệ': MonitorSmartphone,
-  'thiếu nhi': Baby,
-  'trinh thám': Search,
-  'tâm lý': BrainCircuit,
-  'ngoại ngữ': Languages,
+  'văn học': bookOutline,
+  'kinh tế': trendingUpOutline,
+  'kỹ năng sống': compassOutline,
+  'công nghệ': hardwareChipOutline,
+  'thiếu nhi': happyOutline,
+  'trinh thám': searchOutline,
+  'tâm lý': bulbOutline,
+  'ngoại ngữ': languageOutline,
 }
 
 function getCategoryIcon(name) {
-  return categoryIcons[String(name ?? '').trim().toLocaleLowerCase('vi-VN')] ?? BookOpenText
+  return categoryIcons[String(name ?? '').trim().toLocaleLowerCase('vi-VN')] ?? bookOutline
 }
 
 // Resolve details and map from editions
@@ -230,7 +246,7 @@ onUnmounted(() => {
         <!-- Search Palette Section -->
         <div class="search-section">
           <div class="search-palette" :class="{ 'is-focused': isSearchFocused }">
-            <Search class="search-icon" :size="20" />
+            <IonIcon :icon="searchOutline" :size="20" class="search-icon" />
             <input 
               v-model="searchInput" 
               type="text" 
@@ -259,10 +275,10 @@ onUnmounted(() => {
             </div>
             <div class="category-scroll-actions">
               <button class="scroll-btn" title="Cuộn sang trái" aria-label="Cuộn sang trái" @click="scrollCategories(-1)">
-                <ChevronLeft :size="18" />
+                <IonIcon :icon="chevronBackOutline" :size="18" />
               </button>
               <button class="scroll-btn" title="Cuộn sang phải" aria-label="Cuộn sang phía trước" @click="scrollCategories(1)">
-                <ChevronRight :size="18" />
+                <IonIcon :icon="chevronForwardOutline" :size="18" />
               </button>
             </div>
           </div>
@@ -277,10 +293,10 @@ onUnmounted(() => {
             >
               <div class="category-card-top">
                 <div class="category-icon-wrapper">
-                  <component :is="cat.icon" :size="24" stroke-width="1.75" class="category-icon" />
+                  <IonIcon :icon="cat.icon" :size="24" class="category-icon" />
                 </div>
                 <div class="category-arrow-btn" title="Mở thể loại này trong Thư viện" @click.stop="goToCategoryLibrary(cat.name, $event)">
-                  <ArrowUpRight :size="16" class="arrow-icon" />
+                  <IonIcon :icon="openOutline" :size="16" class="arrow-icon" />
                 </div>
               </div>
               <div class="category-info">
@@ -308,7 +324,7 @@ onUnmounted(() => {
               </button>
             </div>
             <button class="view-all-btn" @click="goToLibrary">
-              Xem tất cả <ChevronRight :size="16" />
+              Xem tất cả <IonIcon :icon="chevronForwardOutline" :size="16" />
             </button>
           </div>
           
@@ -349,7 +365,7 @@ onUnmounted(() => {
                   <!-- Hover Overlay Actions -->
                   <div class="ecommerce-overlay">
                     <button class="action-btn quick-view-btn" @click.stop="openBookDetail(book.slug)">
-                      <Eye :size="18" /> Xem chi tiết
+                      <IonIcon :icon="eyeOutline" :size="18" /> Xem chi tiết
                     </button>
                   </div>
                 </div>
@@ -357,7 +373,7 @@ onUnmounted(() => {
                 <!-- Info -->
                 <div class="ecommerce-info">
                   <div class="rating-row">
-                    <Star class="star-icon" :size="14" fill="#fbbf24" color="#fbbf24" />
+                    <IonIcon :icon="star" :size="14" color="#fbbf24" class="star-icon" />
                     <span class="rating-score">{{ book.rating.toFixed(1) }}</span>
                     <span class="review-count">({{ book.reviewCount }})</span>
                   </div>
@@ -374,7 +390,7 @@ onUnmounted(() => {
                   
                   <!-- Add to cart -->
                   <button class="add-to-cart-btn" @click.stop="addToCart($event, book)">
-                    <ShoppingCart :size="16" /> Thêm vào giỏ
+                    <IonIcon :icon="cartOutline" :size="16" /> Thêm vào giỏ
                   </button>
                 </div>
               </div>

@@ -1,18 +1,19 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { 
-  ArrowLeft, 
-  Mail, 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  LogIn, 
-  BookOpen, 
-  Sparkles, 
-  CheckCircle2, 
-  AlertCircle 
-} from 'lucide-vue-next'
+import {
+  arrowBackOutline,
+  bookOutline,
+  sparklesOutline,
+  checkmarkCircleOutline,
+  mailOutline,
+  lockClosedOutline,
+  eyeOutline,
+  eyeOffOutline,
+  alertCircleOutline,
+  logInOutline,
+} from 'ionicons/icons'
+import IonIcon from '../../components/common/IonIcon.vue'
 
 import { login, loginWithGoogle } from '../../stores/auth'
 
@@ -184,14 +185,14 @@ onBeforeUnmount(() => {
         <div class="visual-content">
           <div class="visual-top">
             <RouterLink class="back-link" to="/">
-              <ArrowLeft :size="18" />
+              <IonIcon :icon="arrowBackOutline" :size="18" />
               <span>Về trang chủ</span>
             </RouterLink>
           </div>
 
           <div class="visual-center">
             <div class="brand-badge">
-              <BookOpen :size="20" class="brand-icon" />
+              <IonIcon :icon="bookOutline" :size="20" class="brand-icon" />
               <span>OneOnline</span>
             </div>
             <h1 class="visual-title">Khám phá tri thức & những câu chuyện bất tận</h1>
@@ -201,7 +202,7 @@ onBeforeUnmount(() => {
           <div class="visual-bottom">
             <div class="quote-glass-card">
               <div class="quote-header">
-                <Sparkles :size="16" class="sparkle-icon" />
+                <IonIcon :icon="sparklesOutline" :size="16" class="sparkle-icon" />
                 <span>Trải nghiệm nâng tầm</span>
               </div>
               <p class="quote-text">"Sách là nguồn tri thức không bao giờ vơi cạn."</p>
@@ -220,14 +221,14 @@ onBeforeUnmount(() => {
 
           <form class="auth-form" @submit.prevent="handleSubmit">
             <div v-if="successMessage" class="alert alert-success" role="status">
-              <CheckCircle2 :size="18" />
+              <IonIcon :icon="checkmarkCircleOutline" :size="18" />
               <span>{{ successMessage }}</span>
             </div>
 
             <div class="form-group">
               <label for="email">Địa chỉ Email</label>
               <div class="input-wrapper">
-                <Mail :size="18" class="input-icon" />
+                <IonIcon :icon="mailOutline" :size="18" class="input-icon" />
                 <input
                   id="email"
                   v-model="form.email"
@@ -245,7 +246,7 @@ onBeforeUnmount(() => {
                 <a href="#" class="forgot-password">Quên mật khẩu?</a>
               </div>
               <div class="input-wrapper">
-                <Lock :size="18" class="input-icon" />
+                <IonIcon :icon="lockClosedOutline" :size="18" class="input-icon" />
                 <input
                   id="password"
                   v-model="form.password"
@@ -260,8 +261,8 @@ onBeforeUnmount(() => {
                   @click="showPassword = !showPassword"
                   tabindex="-1"
                 >
-                  <EyeOff v-if="showPassword" :size="18" />
-                  <Eye v-else :size="18" />
+                  <IonIcon v-if="showPassword" :icon="eyeOffOutline" :size="18" />
+                  <IonIcon v-else :icon="eyeOutline" :size="18" />
                 </button>
               </div>
             </div>
@@ -274,7 +275,7 @@ onBeforeUnmount(() => {
             </div>
 
             <div v-if="errorMessage" class="alert alert-error">
-              <AlertCircle :size="18" />
+              <IonIcon :icon="alertCircleOutline" :size="18" />
               <span>{{ errorMessage }}</span>
             </div>
 
@@ -282,7 +283,7 @@ onBeforeUnmount(() => {
               <span v-if="isSubmitting" class="spinner"></span>
               <template v-else>
                 <span>Đăng nhập</span>
-                <LogIn :size="18" />
+                <IonIcon :icon="logInOutline" :size="18" />
               </template>
             </button>
 
