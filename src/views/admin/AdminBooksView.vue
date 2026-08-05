@@ -576,100 +576,134 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
             </header>
 
             <form class="book-form" @submit.prevent="saveBook">
-              <div class="form-grid">
-                <label class="form-field">
-                  <span class="field-label">Tên sách *</span>
-                  <input v-model="form.title" required maxlength="255" placeholder="Nhập tên sách" />
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Đường dẫn SEO *</span>
-                  <input v-model="form.slug" required maxlength="255" placeholder="ten-sach-khong-dau" />
-                </label>
-                <label class="form-field full-span">
-                  <span class="field-label">Mô tả</span>
-                  <textarea v-model="form.description" rows="4" placeholder="Mô tả ngắn về nội dung sách"></textarea>
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Nhà xuất bản *</span>
-                  <select v-model="form.publisherId" required>
-                    <option disabled value="">Chọn nhà xuất bản</option>
-                    <option v-for="publisher in formOptions.publishers" :key="publisher.id" :value="String(publisher.id)">{{ publisher.name }}</option>
-                  </select>
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Trạng thái</span>
-                  <select v-model="form.isActive">
-                    <option :value="true">Đang hiển thị</option>
-                    <option :value="false">Đã ẩn</option>
-                  </select>
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Tác giả *</span>
-                  <select v-model="form.authorIds" multiple required>
-                    <option v-for="author in formOptions.authors" :key="author.id" :value="String(author.id)">{{ author.name }}</option>
-                  </select>
-                  <small>Giữ Ctrl / Cmd để chọn nhiều.</small>
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Thể loại *</span>
-                  <select v-model="form.categoryIds" multiple required>
-                    <option v-for="category in formOptions.categories" :key="category.id" :value="String(category.id)">{{ category.name }}</option>
-                  </select>
-                  <small>Giữ Ctrl / Cmd để chọn nhiều.</small>
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Giá bán Ebook (đ)</span>
-                  <input type="number" v-model="form.ebookSalePrice" min="0" placeholder="VD: 99000" />
-                </label>
-                <label class="form-field">
-                  <span class="field-label">Giá gốc Ebook (đ)</span>
-                  <input type="number" v-model="form.ebookOriginalPrice" min="0" placeholder="VD: 129000" />
-                </label>
+              <!-- Section 1: Thông tin cơ bản -->
+              <div class="form-section">
+                <h4 class="form-section-title">1. Thông tin cơ bản</h4>
+                <div class="form-grid">
+                  <label class="form-field">
+                    <span class="field-label">Tên sách <span class="required">*</span></span>
+                    <input v-model="form.title" required maxlength="255" placeholder="Nhập tên sách..." />
+                  </label>
 
-                <!-- PDF Upload -->
-                <label class="form-field full-span upload-field">
-                  <span class="field-label">
-                    <PhFileText :size="16" />
-                    File PDF Ebook {{ editingBookId ? '(tùy chọn)' : '' }}
-                  </span>
-                  <div class="upload-zone" :class="{ 'has-file': pdfFileName }">
-                    <PhUploadSimple :size="24" class="upload-icon" />
-                    <span v-if="pdfFileName" class="existing-file-text">
-                      📄 <strong>File PDF hiện có:</strong> {{ pdfFileName }}
-                      <br /><small class="change-hint">(Nhấn hoặc kéo thả file mới để thay thế)</small>
-                    </span>
-                    <span v-else>Kéo thả hoặc nhấn để chọn file PDF</span>
-                    <input type="file" accept="application/pdf" @change="handlePdfChange" />
-                  </div>
-                </label>
+                  <label class="form-field">
+                    <span class="field-label">Đường dẫn SEO (Slug) <span class="required">*</span></span>
+                    <input v-model="form.slug" required maxlength="255" placeholder="ten-sach-khong-dau" />
+                  </label>
 
-                <!-- Cover Upload -->
-                <label class="form-field full-span upload-field">
-                  <span class="field-label">
-                    <PhImage :size="16" />
-                    Ảnh bìa {{ editingBookId ? '(tùy chọn)' : '' }}
-                  </span>
-                  <div class="upload-zone" :class="{ 'has-file': coverPreview }">
-                    <PhUploadSimple :size="24" class="upload-icon" />
-                    <span v-if="coverPreview" class="existing-file-text">
-                      🖼️ <strong>Ảnh bìa đã có trong hệ thống</strong>
-                      <br /><small class="change-hint">(Nhấn hoặc kéo thả ảnh mới để thay thế)</small>
-                    </span>
-                    <span v-else>JPG, PNG hoặc WebP – Nhấn để chọn</span>
-                    <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleCoverChange" />
-                  </div>
-                </label>
+                  <label class="form-field full-span">
+                    <span class="field-label">Mô tả sách</span>
+                    <textarea v-model="form.description" rows="3" placeholder="Tóm tắt nội dung sách, điểm nổi bật..."></textarea>
+                  </label>
 
-                <div v-if="coverPreview" class="cover-preview-wrap full-span">
-                  <img class="cover-preview" :src="coverPreview" alt="Xem trước ảnh bìa" />
+                  <label class="form-field">
+                    <span class="field-label">Nhà xuất bản <span class="required">*</span></span>
+                    <select v-model="form.publisherId" required>
+                      <option disabled value="">Chọn nhà xuất bản</option>
+                      <option v-for="publisher in formOptions.publishers" :key="publisher.id" :value="String(publisher.id)">{{ publisher.name }}</option>
+                    </select>
+                  </label>
+
+                  <label class="form-field">
+                    <span class="field-label">Trạng thái hiển thị</span>
+                    <select v-model="form.isActive">
+                      <option :value="true">Đang hiển thị</option>
+                      <option :value="false">Đã ẩn</option>
+                    </select>
+                  </label>
                 </div>
               </div>
 
-              <div class="modal-actions">
+              <!-- Section 2: Tác giả & Thể loại -->
+              <div class="form-section">
+                <h4 class="form-section-title">2. Phân loại & Tác giả</h4>
+                <div class="form-grid">
+                  <label class="form-field">
+                    <span class="field-label">Tác giả <span class="required">*</span></span>
+                    <select v-model="form.authorIds" multiple required class="multi-select">
+                      <option v-for="author in formOptions.authors" :key="author.id" :value="String(author.id)">{{ author.name }}</option>
+                    </select>
+                    <small class="field-hint">💡 Giữ Ctrl (Windows) hoặc Cmd (Mac) để chọn nhiều tác giả.</small>
+                  </label>
+
+                  <label class="form-field">
+                    <span class="field-label">Thể loại <span class="required">*</span></span>
+                    <select v-model="form.categoryIds" multiple required class="multi-select">
+                      <option v-for="category in formOptions.categories" :key="category.id" :value="String(category.id)">{{ category.name }}</option>
+                    </select>
+                    <small class="field-hint">💡 Giữ Ctrl (Windows) hoặc Cmd (Mac) để chọn nhiều thể loại.</small>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Section 3: Giá bán Ebook -->
+              <div class="form-section">
+                <h4 class="form-section-title">3. Giá bán Ebook</h4>
+                <div class="form-grid">
+                  <label class="form-field">
+                    <span class="field-label">Giá bán khuyến mãi (đ)</span>
+                    <input type="number" v-model="form.ebookSalePrice" min="0" placeholder="VD: 99000" />
+                  </label>
+
+                  <label class="form-field">
+                    <span class="field-label">Giá gốc niêm yết (đ)</span>
+                    <input type="number" v-model="form.ebookOriginalPrice" min="0" placeholder="VD: 129000" />
+                  </label>
+                </div>
+              </div>
+
+              <!-- Section 4: File & Bìa sách -->
+              <div class="form-section">
+                <h4 class="form-section-title">4. Tệp tin & Ảnh bìa</h4>
+                <div class="form-grid">
+                  <!-- PDF Upload -->
+                  <label class="form-field full-span upload-field">
+                    <span class="field-label">
+                      <PhFileText :size="16" />
+                      File PDF Ebook {{ editingBookId ? '(tùy chọn)' : '' }}
+                    </span>
+                    <div class="upload-zone" :class="{ 'has-file': pdfFileName }">
+                      <PhUploadSimple :size="22" class="upload-icon" />
+                      <span v-if="pdfFileName" class="existing-file-text">
+                        📄 <strong>File PDF hiện có:</strong> {{ pdfFileName }}
+                        <br /><small class="change-hint">(Nhấn hoặc kéo thả file mới để thay thế)</small>
+                      </span>
+                      <span v-else>Kéo thả hoặc nhấn để chọn file PDF Ebook</span>
+                      <input type="file" accept="application/pdf" @change="handlePdfChange" />
+                    </div>
+                  </label>
+
+                  <!-- Cover Upload -->
+                  <label class="form-field full-span upload-field">
+                    <span class="field-label">
+                      <PhImage :size="16" />
+                      Ảnh bìa {{ editingBookId ? '(tùy chọn)' : '' }}
+                    </span>
+                    <div class="upload-zone" :class="{ 'has-file': coverPreview }">
+                      <PhUploadSimple :size="22" class="upload-icon" />
+                      <span v-if="coverPreview" class="existing-file-text">
+                        🖼️ <strong>Ảnh bìa đã chọn / có trong hệ thống</strong>
+                        <br /><small class="change-hint">(Nhấn hoặc kéo thả ảnh mới để thay thế)</small>
+                      </span>
+                      <span v-else>Format JPG, PNG hoặc WebP – Kéo thả hoặc nhấn để chọn</span>
+                      <input type="file" accept="image/jpeg,image/png,image/webp" @change="handleCoverChange" />
+                    </div>
+                  </label>
+
+                  <div v-if="coverPreview" class="cover-preview-wrap full-span">
+                    <div class="preview-badge-box">
+                      <img class="cover-preview" :src="coverPreview" alt="Xem trước ảnh bìa" />
+                      <span class="preview-label">Xem trước ảnh bìa</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sticky Modal Actions Toolbar -->
+              <div class="modal-actions-sticky">
                 <button class="cancel-btn" type="button" :disabled="isSaving" @click="closeModal">Hủy</button>
                 <button class="submit-btn" type="submit" :disabled="isSaving">
                   <span v-if="isSaving" class="btn-spinner"></span>
-                  {{ isSaving ? 'Đang lưu…' : editingBookId ? 'Lưu thay đổi' : 'Tạo sách' }}
+                  {{ isSaving ? 'Đang lưu…' : editingBookId ? 'Lưu thay đổi' : 'Tạo sách mới' }}
                 </button>
               </div>
             </form>
@@ -1268,7 +1302,7 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
   opacity: 0.4;
 }
 
-/* ─── Modal ─── */
+/* ─── Modal & Form High-Craft Redesign ─── */
 .modal-backdrop {
   position: fixed;
   z-index: 100;
@@ -1276,20 +1310,21 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(9, 9, 11, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .book-modal {
-  width: min(740px, 100%);
+  width: min(720px, 100%);
   max-height: calc(100dvh - 3rem);
-  overflow-y: auto;
-  border: 1px solid var(--bento-border, rgba(226, 232, 240, 0.8));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 1.25rem;
-  background: var(--bento-surface, #fff);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
-  padding: 0;
+  background: #ffffff;
+  box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.25), 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .modal-header {
@@ -1297,8 +1332,9 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1.5rem 1.75rem;
-  border-bottom: 1px solid var(--bento-border, rgba(226, 232, 240, 0.8));
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
 }
 
 .modal-header-left {
@@ -1308,57 +1344,87 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
 }
 
 .modal-icon {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 0.875rem;
-  background: #f4f4f5;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   display: grid;
   place-items: center;
-  color: var(--text-main);
+  color: #0f172a;
   flex-shrink: 0;
 }
 
 .modal-header h3 {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  color: #0f172a;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .modal-header p {
   font-size: 0.8rem;
-  color: var(--text-muted);
-  margin: 0.15rem 0 0 0;
+  color: #64748b;
+  margin: 0.2rem 0 0 0;
 }
 
 .modal-close-btn {
-  width: 36px;
-  height: 36px;
-  border: none;
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
   border-radius: 0.625rem;
   background: transparent;
-  color: var(--text-muted);
+  color: #64748b;
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s ease;
   flex-shrink: 0;
 }
 
 .modal-close-btn:hover {
-  background: #f4f4f5;
-  color: var(--text-main);
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #e2e8f0;
 }
 
-/* ─── Form ─── */
+/* Form Sections */
 .book-form {
-  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 1.5rem 1.75rem 0;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.form-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0.5rem;
+}
+
+.form-section-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.1rem;
+  gap: 1rem 1.25rem;
 }
 
 .full-span {
@@ -1373,11 +1439,15 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
 
 .field-label {
   font-size: 0.825rem;
-  font-weight: 650;
-  color: var(--text-main);
+  font-weight: 600;
+  color: #334155;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+}
+
+.required {
+  color: #ef4444;
 }
 
 .form-field input,
@@ -1385,32 +1455,40 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
 .form-field textarea {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--bento-border, rgba(226, 232, 240, 0.8));
+  border: 1px solid #cbd5e1;
   border-radius: 0.625rem;
-  background: #fff;
+  background: #ffffff;
   padding: 0.65rem 0.85rem;
-  color: var(--text-main);
+  color: #0f172a;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
-  border-color: #a1a1aa;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.08);
 }
 
-.form-field select[multiple] {
-  min-height: 7rem;
+.multi-select {
+  min-height: 7.5rem;
+  padding: 0.5rem !important;
 }
 
-.form-field small {
+.multi-select option {
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.375rem;
+  margin-bottom: 2px;
+}
+
+.field-hint {
   font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 400;
+  color: #64748b;
+  line-height: 1.4;
 }
 
 /* Upload Zone */
@@ -1420,43 +1498,43 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 1.25rem;
-  border: 2px dashed rgba(226, 232, 240, 0.8);
+  gap: 0.4rem;
+  padding: 1.35rem;
+  border: 2px dashed #cbd5e1;
   border-radius: 0.875rem;
-  background: #fafafa;
-  color: var(--text-muted);
+  background: #f8fafc;
+  color: #64748b;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .upload-zone:hover {
-  border-color: #a1a1aa;
-  background: #f4f4f5;
+  border-color: #0f172a;
+  background: #f1f5f9;
+  color: #0f172a;
 }
 
 .upload-zone.has-file {
-  background: #ecfdf5;
-  border-color: #10b981;
+  background: #f0fdf4;
+  border-color: #22c55e;
   border-style: solid;
 }
 
 .existing-file-text {
   text-align: center;
-  color: #065f46;
+  color: #15803d;
   font-size: 0.85rem;
 }
 
 .change-hint {
-  color: #059669;
-  font-weight: 400;
+  color: #16a34a;
   font-size: 0.78rem;
 }
 
 .upload-zone.has-file .upload-icon {
-  color: #10b981;
+  color: #22c55e;
 }
 
 .upload-zone input[type="file"] {
@@ -1464,93 +1542,114 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
   inset: 0;
   opacity: 0;
   cursor: pointer;
-  border: none;
-  padding: 0;
 }
 
 .upload-icon {
-  color: #a1a1aa;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
 }
 
-.file-selected {
-  color: #059669 !important;
-  font-weight: 600 !important;
+.upload-zone:hover .upload-icon {
+  transform: translateY(-2px);
+  color: #0f172a;
 }
 
-/* Cover Preview */
+/* Cover Preview Box */
 .cover-preview-wrap {
   display: flex;
+  margin-top: 0.25rem;
+}
+
+.preview-badge-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 
 .cover-preview {
-  width: 88px;
-  height: 120px;
-  border-radius: 0.625rem;
+  width: 70px;
+  height: 96px;
+  border-radius: 0.5rem;
   object-fit: cover;
-  border: 1px solid var(--bento-border);
-  box-shadow: 3px 3px 10px -4px rgba(0, 0, 0, 0.12);
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* Modal Actions */
-.modal-actions {
+.preview-label {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Sticky Modal Actions Toolbar */
+.modal-actions-sticky {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
   display: flex;
   justify-content: flex-end;
-  gap: 0.6rem;
-  padding-top: 1.5rem;
-  margin-top: 0.5rem;
-  border-top: 1px solid var(--bento-border, rgba(226, 232, 240, 0.8));
+  gap: 0.75rem;
+  padding: 1.25rem 0 1.5rem;
+  margin-top: 1rem;
+  background: #ffffff;
+  border-top: 1px solid #f1f5f9;
 }
 
 .cancel-btn {
-  padding: 0.7rem 1.25rem;
-  border: 1px solid var(--bento-border, rgba(226, 232, 240, 0.8));
+  padding: 0.65rem 1.35rem;
+  border: 1px solid #cbd5e1;
   border-radius: 0.625rem;
-  background: var(--bento-surface, #fff);
-  color: var(--text-main);
+  background: #ffffff;
+  color: #334155;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.18s ease;
 }
 
 .cancel-btn:hover {
-  background: #f4f4f5;
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
 }
 
 .submit-btn {
-  padding: 0.7rem 1.5rem;
+  padding: 0.65rem 1.6rem;
   border: none;
   border-radius: 0.625rem;
-  background: var(--text-main, #09090b);
-  color: #fff;
+  background: #0f172a;
+  color: #ffffff;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.2s;
+  transition: all 0.18s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
 
 .submit-btn:hover {
-  opacity: 0.9;
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.2);
+}
+
+.submit-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .submit-btn:disabled,
 .cancel-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
-}
-
-.btn-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.6s linear infinite;
+  transform: none;
 }
 
 /* Modal Animation */
