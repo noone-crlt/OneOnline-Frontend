@@ -29,6 +29,12 @@ const errorMessage = ref('')
 
 const categoryChipsRef = ref(null)
 
+const searchQuery = ref('')
+const selectedCategory = ref('')
+const selectedFormat = ref('')
+const selectedSort = ref('newest')
+let searchTimer = null
+
 function scrollCategories(direction) {
   if (categoryChipsRef.value) {
     categoryChipsRef.value.scrollBy({
