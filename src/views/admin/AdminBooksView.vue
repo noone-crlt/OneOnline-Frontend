@@ -75,6 +75,43 @@ const form = reactive({
   ebookSalePrice: '',
 })
 
+function formatNumberWithDots(val) {
+  if (val === null || val === undefined || val === '') return ''
+  const cleanStr = String(val).replace(/\D/g, '')
+  if (!cleanStr) return ''
+  return Number(cleanStr).toLocaleString('vi-VN')
+}
+
+function parseNumberFromDots(val) {
+  if (val === null || val === undefined) return ''
+  return String(val).replace(/\D/g, '')
+}
+
+function formatVndDisplay(val) {
+  if (val === null || val === undefined || val === '') return ''
+  const num = Number(val)
+  if (isNaN(num)) return ''
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num)
+}
+
+const displayEbookSalePrice = computed({
+  get() {
+    return formatNumberWithDots(form.ebookSalePrice)
+  },
+  set(val) {
+    form.ebookSalePrice = parseNumberFromDots(val)
+  },
+})
+
+const displayEbookOriginalPrice = computed({
+  get() {
+    return formatNumberWithDots(form.ebookOriginalPrice)
+  },
+  set(val) {
+    form.ebookOriginalPrice = parseNumberFromDots(val)
+  },
+})
+
 function clearMessages() {
   errorMessage.value = ''
   successMessage.value = ''
@@ -640,13 +677,19 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
                 <h4 class="form-section-title">3. Giá bán Ebook</h4>
                 <div class="form-grid">
                   <label class="form-field">
-                    <span class="field-label">Giá bán khuyến mãi (đ)</span>
-                    <input type="number" v-model="form.ebookSalePrice" min="0" placeholder="VD: 99000" />
+                    <span class="field-label">Giá bán khuyến mãi (VNĐ)</span>
+                    <input type="text" v-model="displayEbookSalePrice" placeholder="VD: 99.000" />
+                    <small v-if="form.ebookSalePrice" class="field-hint price-hint">
+                      💰 Hiển thị: <strong>{{ formatVndDisplay(form.ebookSalePrice) }}</strong>
+                    </small>
                   </label>
 
                   <label class="form-field">
-                    <span class="field-label">Giá gốc niêm yết (đ)</span>
-                    <input type="number" v-model="form.ebookOriginalPrice" min="0" placeholder="VD: 129000" />
+                    <span class="field-label">Giá gốc niêm yết (VNĐ)</span>
+                    <input type="text" v-model="displayEbookOriginalPrice" placeholder="VD: 129.000" />
+                    <small v-if="form.ebookOriginalPrice" class="field-hint price-hint">
+                      💰 Hiển thị: <strong>{{ formatVndDisplay(form.ebookOriginalPrice) }}</strong>
+                    </small>
                   </label>
                 </div>
               </div>
@@ -1489,6 +1532,11 @@ onBeforeUnmount(() => clearTimeout(searchTimer))
   font-size: 0.75rem;
   color: #64748b;
   line-height: 1.4;
+}
+
+.price-hint {
+  color: #059669;
+  font-weight: 500;
 }
 
 /* Upload Zone */
