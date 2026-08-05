@@ -234,24 +234,6 @@ onMounted(async () => {
             <button type="button" class="suggestion-tag" @click="searchQuery = 'Tâm lý'">Tâm lý</button>
             <button type="button" class="suggestion-tag" @click="searchQuery = 'Văn học'">Văn học</button>
           </div>
-
-          <!-- Micro Stats -->
-          <div class="hero-stats-row">
-            <div class="stat-item">
-              <span class="stat-num">1,200+</span>
-              <span class="stat-lbl">Sách tuyển chọn</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-num">3</span>
-              <span class="stat-lbl">Định dạng đọc & nghe</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <span class="stat-num">100%</span>
-              <span class="stat-lbl">Bản quyền chính hãng</span>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -590,7 +572,7 @@ onMounted(async () => {
   gap: 0.5rem;
   font-size: 0.8rem;
   color: #71717a;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0;
   flex-wrap: wrap;
 }
 
@@ -613,39 +595,6 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.1);
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.25);
-}
-
-.hero-stats-row {
-  display: inline-flex;
-  align-items: center;
-  gap: 1.75rem;
-  padding: 0.75rem 1.75rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-num {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.stat-lbl {
-  font-size: 0.725rem;
-  color: #71717a;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Filter Bar */
