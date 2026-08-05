@@ -808,18 +808,35 @@ onUnmounted(() => {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
   
   /* Padding to prevent hover shadow clipping */
-  padding: 1rem 0.5rem 2rem 0.5rem;
-  margin: -1rem -0.5rem -2rem -0.5rem;
+  padding: 1rem 0.5rem 1.25rem 0.5rem;
+  margin: -1rem -0.5rem 0 -0.5rem;
   
-  /* Hide scrollbar */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  /* Custom styled horizontal scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
 }
 
 .categories-bento-grid::-webkit-scrollbar {
-  display: none;
+  height: 6px;
+  display: block;
+}
+
+.categories-bento-grid::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 9999px;
+}
+
+.categories-bento-grid::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.categories-bento-grid::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* Base Bento Card Style */
