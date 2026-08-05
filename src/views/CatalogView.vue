@@ -202,8 +202,13 @@ onMounted(async () => {
     <main class="catalog-main">
       <!-- Hero Banner -->
       <section class="catalog-hero">
+        <div class="hero-ambient-glow" aria-hidden="true"></div>
         <div class="catalog-hero__inner">
-          <p class="hero-kicker">THƯ VIỆN SÁCH ONE ONLINE</p>
+          <div class="hero-kicker-badge">
+            <PhBookBookmark :size="14" weight="bold" />
+            <span>THƯ VIỆN SÁCH ONE ONLINE</span>
+          </div>
+
           <h1 class="hero-title">Khám phá tri thức không giới hạn</h1>
           <p class="hero-subtitle">
             Hàng ngàn tác phẩm sách điện tử, sách nói và sách giấy chất lượng cao được tuyển chọn dành riêng cho bạn.
@@ -218,7 +223,34 @@ onMounted(async () => {
               placeholder="Tìm kiếm theo tên sách, tác giả, nội dung..."
               class="search-input"
             />
-            <button v-if="searchQuery" type="button" class="clear-btn" @click="searchQuery = ''">✕</button>
+            <button v-if="searchQuery" type="button" class="clear-btn" aria-label="Xóa tìm kiếm" @click="searchQuery = ''">✕</button>
+          </div>
+
+          <!-- Quick Search Tags -->
+          <div class="search-suggestions">
+            <span class="suggestion-label">Gợi ý:</span>
+            <button type="button" class="suggestion-tag" @click="searchQuery = 'Kinh tế'">Kinh tế</button>
+            <button type="button" class="suggestion-tag" @click="searchQuery = 'Sapiens'">Sapiens</button>
+            <button type="button" class="suggestion-tag" @click="searchQuery = 'Tâm lý'">Tâm lý</button>
+            <button type="button" class="suggestion-tag" @click="searchQuery = 'Văn học'">Văn học</button>
+          </div>
+
+          <!-- Micro Stats -->
+          <div class="hero-stats-row">
+            <div class="stat-item">
+              <span class="stat-num">1,200+</span>
+              <span class="stat-lbl">Sách tuyển chọn</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-num">3</span>
+              <span class="stat-lbl">Định dạng đọc & nghe</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-num">100%</span>
+              <span class="stat-lbl">Bản quyền chính hãng</span>
+            </div>
           </div>
         </div>
       </section>
@@ -420,45 +452,78 @@ onMounted(async () => {
 
 /* Hero Section */
 .catalog-hero {
-  background: linear-gradient(180deg, #111113 0%, #1a1a1e 100%);
+  position: relative;
+  background-color: #09090b;
+  background-image: 
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(99, 102, 241, 0.25), rgba(9, 9, 11, 0)),
+    radial-gradient(circle at 50% 100%, rgba(37, 99, 235, 0.1), rgba(9, 9, 11, 0));
   color: #ffffff;
-  padding: 4rem 1.5rem 3.5rem;
+  padding: 4.5rem 1.5rem 4rem;
   text-align: center;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-ambient-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 1000px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.15) 0%, rgba(9, 9, 11, 0) 70%);
+  pointer-events: none;
 }
 
 .catalog-hero__inner {
-  max-width: 720px;
+  position: relative;
+  z-index: 10;
+  max-width: 760px;
   margin: 0 auto;
 }
 
-.hero-kicker {
-  font-size: 0.75rem;
+.hero-kicker-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e4e4e7;
+  font-size: 0.725rem;
   font-weight: 700;
-  letter-spacing: 0.15em;
-  color: #a1a1aa;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .hero-title {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   font-weight: 800;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
   margin-bottom: 1rem;
-  line-height: 1.2;
+  color: #ffffff !important;
+  background: linear-gradient(180deg, #ffffff 40%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
-  font-size: 1rem;
-  color: #d4d4d8;
-  margin-bottom: 2rem;
+  font-size: 1.05rem;
+  color: #a1a1aa;
+  margin: 0 auto 2.25rem;
+  max-width: 620px;
   line-height: 1.6;
 }
 
 .search-wrapper {
   position: relative;
-  max-width: 580px;
-  margin: 0 auto;
+  max-width: 600px;
+  margin: 0 auto 0.75rem;
 }
 
 .search-icon {
@@ -472,15 +537,16 @@ onMounted(async () => {
 
 .search-input {
   width: 100%;
-  padding: 0.9rem 3rem 0.9rem 3.25rem;
+  padding: 1rem 3.25rem 1rem 3.5rem;
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(20px);
+  color: #ffffff !important;
   font-size: 0.95rem;
   outline: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s ease;
+  box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.5);
 }
 
 .search-input::placeholder {
@@ -488,9 +554,9 @@ onMounted(async () => {
 }
 
 .search-input:focus {
-  border-color: #ffffff;
+  border-color: rgba(99, 102, 241, 0.6);
   background: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18), 0 20px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
 .clear-btn {
@@ -498,11 +564,88 @@ onMounted(async () => {
   right: 1.25rem;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: rgba(255, 255, 255, 0.1);
   border: none;
   color: #a1a1aa;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.clear-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.search-suggestions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #71717a;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.suggestion-label {
+  font-weight: 500;
+}
+
+.suggestion-tag {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+  padding: 0.2rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.775rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.suggestion-tag:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.hero-stats-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 1.75rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.stat-lbl {
+  font-size: 0.725rem;
+  color: #71717a;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Filter Bar */
