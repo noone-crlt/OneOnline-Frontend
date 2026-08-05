@@ -240,62 +240,68 @@ onMounted(async () => {
       <!-- Filter Controls Bar -->
       <section class="filter-bar">
         <div class="filter-bar__inner">
-          <!-- Format Filters -->
-          <div class="format-pills">
-            <button
-              v-for="fmt in formatFilters"
-              :key="fmt.value"
-              type="button"
-              class="format-pill-btn"
-              :class="{ active: selectedFormat === fmt.value }"
-              @click="handleFormatSelect(fmt.value)"
-            >
-              {{ fmt.label }}
-            </button>
-          </div>
-
-          <!-- Category Chips Slider -->
-          <div v-if="categories.length > 0" class="category-slider-wrapper">
-            <button
-              type="button"
-              class="slider-nav-btn prev-btn"
-              title="Cuộn sang trái"
-              aria-label="Cuộn sang trái"
-              @click="scrollCategories(-1)"
-            >
-              <PhCaretLeft :size="16" weight="bold" />
-            </button>
-
-            <div ref="categoryChipsRef" class="category-chips">
+          <!-- Format Filters Row -->
+          <div class="format-pills-row">
+            <span class="filter-label">Định dạng:</span>
+            <div class="format-pills">
               <button
+                v-for="fmt in formatFilters"
+                :key="fmt.value"
                 type="button"
-                class="chip-btn"
-                :class="{ active: selectedCategory === '' }"
-                @click="handleCategorySelect('')"
+                class="format-pill-btn"
+                :class="{ active: selectedFormat === fmt.value }"
+                @click="handleFormatSelect(fmt.value)"
               >
-                Tất cả thể loại
-              </button>
-              <button
-                v-for="cat in categories"
-                :key="cat.id || cat.name"
-                type="button"
-                class="chip-btn"
-                :class="{ active: selectedCategory === cat.name }"
-                @click="handleCategorySelect(cat.name)"
-              >
-                {{ cat.name }}
+                {{ fmt.label }}
               </button>
             </div>
+          </div>
 
-            <button
-              type="button"
-              class="slider-nav-btn next-btn"
-              title="Cuộn sang phải"
-              aria-label="Cuộn sang phải"
-              @click="scrollCategories(1)"
-            >
-              <PhCaretRight :size="16" weight="bold" />
-            </button>
+          <!-- Category Chips Slider Row -->
+          <div v-if="categories.length > 0" class="category-slider-row">
+            <span class="filter-label">Thể loại:</span>
+            <div class="category-slider-wrapper">
+              <button
+                type="button"
+                class="slider-nav-btn prev-btn"
+                title="Cuộn sang trái"
+                aria-label="Cuộn sang trái"
+                @click="scrollCategories(-1)"
+              >
+                <PhCaretLeft :size="15" weight="bold" />
+              </button>
+
+              <div ref="categoryChipsRef" class="category-chips">
+                <button
+                  type="button"
+                  class="chip-btn"
+                  :class="{ active: selectedCategory === '' }"
+                  @click="handleCategorySelect('')"
+                >
+                  Tất cả thể loại
+                </button>
+                <button
+                  v-for="cat in categories"
+                  :key="cat.id || cat.name"
+                  type="button"
+                  class="chip-btn"
+                  :class="{ active: selectedCategory === cat.name }"
+                  @click="handleCategorySelect(cat.name)"
+                >
+                  {{ cat.name }}
+                </button>
+              </div>
+
+              <button
+                type="button"
+                class="slider-nav-btn next-btn"
+                title="Cuộn sang phải"
+                aria-label="Cuộn sang phải"
+                @click="scrollCategories(1)"
+              >
+                <PhCaretRight :size="15" weight="bold" />
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -597,137 +603,147 @@ onMounted(async () => {
   border-color: rgba(255, 255, 255, 0.25);
 }
 
-/* Filter Bar */
+/* Filter Bar - Unified Dark Obsidian Glassmorphism */
 .filter-bar {
-  background: #ffffff;
-  border-bottom: 1px solid #e4e4e7;
+  background: #0d0d11;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
   top: 64px;
   z-index: 20;
+  backdrop-filter: blur(16px);
+  padding: 0.85rem 0;
 }
 
 .filter-bar__inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem 1.5rem;
+  padding: 0 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
+.format-pills-row,
+.category-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #71717a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  min-width: 72px;
+}
+
 .format-pills {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
 }
 
 .format-pill-btn {
-  padding: 0.5rem 1.1rem;
+  padding: 0.4rem 0.95rem;
   border-radius: 9999px;
-  border: 1px solid #e4e4e7;
-  background: #f4f4f5;
-  color: #3f3f46;
-  font-size: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #a1a1aa;
+  font-size: 0.825rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .format-pill-btn:hover {
-  background: #e4e4e7;
-  color: #18181b;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .format-pill-btn.active {
-  background: #18181b;
-  color: #ffffff;
-  border-color: #18181b;
+  background: #ffffff;
+  color: #09090b;
+  font-weight: 700;
+  border-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
 }
 
 .category-slider-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  width: 100%;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .category-chips {
   flex: 1;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   overflow-x: auto;
-  padding-bottom: 0.5rem;
+  padding: 0.2rem 0;
   scroll-behavior: smooth;
-  /* Thin custom scrollbar */
-  scrollbar-width: thin;
-  scrollbar-color: #cbd5e1 #f4f4f5;
+  /* HIDE CLUNKY BROWSER SCROLLBAR */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .category-chips::-webkit-scrollbar {
-  height: 6px;
-}
-
-.category-chips::-webkit-scrollbar-track {
-  background: #f4f4f5;
-  border-radius: 9999px;
-}
-
-.category-chips::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-  transition: background 0.2s ease;
-}
-
-.category-chips::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  display: none;
 }
 
 .slider-nav-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  border: 1px solid #e4e4e7;
-  background: #ffffff;
-  color: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e4e4e7;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
 .slider-nav-btn:hover {
-  background: #18181b;
+  background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
-  border-color: #18181b;
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 .chip-btn {
   padding: 0.35rem 0.85rem;
-  border-radius: 6px;
-  border: 1px solid #f4f4f5;
-  background: #ffffff;
-  color: #71717a;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: #a1a1aa;
   font-size: 0.8rem;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .chip-btn:hover {
-  background: #f4f4f5;
-  color: #18181b;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .chip-btn.active {
-  background: #f4f4f5;
-  color: #18181b;
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
   font-weight: 600;
-  border-color: #d4d4d8;
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 /* Content Area */
