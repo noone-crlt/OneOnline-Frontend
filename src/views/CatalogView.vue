@@ -204,11 +204,6 @@ onMounted(async () => {
       <section class="catalog-hero">
         <div class="hero-ambient-glow" aria-hidden="true"></div>
         <div class="catalog-hero__inner">
-          <div class="hero-kicker-badge">
-            <PhBookBookmark :size="14" weight="bold" />
-            <span>THƯ VIỆN SÁCH ONE ONLINE</span>
-          </div>
-
           <h1 class="hero-title">Khám phá tri thức không giới hạn</h1>
           <p class="hero-subtitle">
             Hàng ngàn tác phẩm sách điện tử, sách nói và sách giấy chất lượng cao được tuyển chọn dành riêng cho bạn.
@@ -469,23 +464,6 @@ onMounted(async () => {
   z-index: 10;
   max-width: 760px;
   margin: 0 auto;
-}
-
-.hero-kicker-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 1rem;
-  border-radius: 9999px;
-  background: rgba(180, 83, 9, 0.08);
-  border: 1px solid rgba(180, 83, 9, 0.18);
-  color: #92400e;
-  font-size: 0.725rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(180, 83, 9, 0.06);
 }
 
 .hero-title {
