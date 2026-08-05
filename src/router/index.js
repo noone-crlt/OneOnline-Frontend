@@ -9,6 +9,7 @@ import AdminUsersView from '../views/admin/AdminUsersView.vue'
 import AdminAuthorsView from '../views/admin/AdminAuthorsView.vue'
 import Homepage from '../components/Homepage.vue'
 import LibraryView from '../components/Library.vue'
+import CatalogView from '../views/CatalogView.vue'
 import LoginView from '../views/auth/LoginView.vue'
 import RegisterView from '../views/auth/RegisterView.vue'
 import BookDetail from '../views/BookDetail.vue'
@@ -53,9 +54,18 @@ const router = createRouter({
     {
       path: '/library',
       name: 'library',
-      component: LibraryView,
+      component: CatalogView,
       meta: {
         title: 'Thư viện',
+      },
+    },
+    {
+      path: '/my-library',
+      name: 'my-library',
+      component: LibraryView,
+      meta: {
+        title: 'Thư viện của tôi',
+        requiresAuth: true,
       },
     },
     {

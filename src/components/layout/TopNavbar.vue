@@ -87,7 +87,7 @@ watch(authIsAuthenticated, () => {
           <RouterLink class="topbar-utility" to="/login">Đăng nhập</RouterLink>
         </template>
         <template v-else>
-          <RouterLink class="my-library-btn" to="/library" :class="{ active: route.path === '/library' }">
+          <RouterLink class="my-library-btn" to="/my-library" :class="{ active: route.path === '/my-library' }">
             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>

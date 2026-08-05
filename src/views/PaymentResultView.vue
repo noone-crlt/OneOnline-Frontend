@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="result-actions">
-        <RouterLink to="/library" class="primary-action">Về thư viện</RouterLink>
+        <RouterLink to="/my-library" class="primary-action">Đến kho sách đã mua</RouterLink>
         <RouterLink v-if="!success" to="/cart" class="secondary-action">Kiểm tra giỏ hàng</RouterLink>
         <button v-if="pending" class="cancel-action" :disabled="cancelling" @click="cancelPendingPayment">
           {{ cancelling ? 'Đang hủy...' : 'Hủy giao dịch' }}
