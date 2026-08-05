@@ -27,11 +27,16 @@ const pageSize = ref(16)
 const isLoading = ref(true)
 const errorMessage = ref('')
 
-const searchQuery = ref('')
-const selectedCategory = ref('')
-const selectedFormat = ref('')
-const selectedSort = ref('newest')
-let searchTimer = null
+const categoryChipsRef = ref(null)
+
+function scrollCategories(direction) {
+  if (categoryChipsRef.value) {
+    categoryChipsRef.value.scrollBy({
+      left: direction * 280,
+      behavior: 'smooth',
+    })
+  }
+}
 
 const formatFilters = [
   { label: 'Tất cả định dạng', value: '' },
@@ -229,25 +234,47 @@ onMounted(async () => {
             </button>
           </div>
 
-          <!-- Category Chips -->
-          <div v-if="categories.length > 0" class="category-chips">
+          <!-- Category Chips Slider -->
+          <div v-if="categories.length > 0" class="category-slider-wrapper">
             <button
               type="button"
-              class="chip-btn"
-              :class="{ active: selectedCategory === '' }"
-              @click="handleCategorySelect('')"
+              class="slider-nav-btn prev-btn"
+              title="Cuộn sang trái"
+              aria-label="Cuộn sang trái"
+              @click="scrollCategories(-1)"
             >
-              Tất cả thể loại
+              <PhCaretLeft :size="16" weight="bold" />
             </button>
+
+            <div ref="categoryChipsRef" class="category-chips">
+              <button
+                type="button"
+                class="chip-btn"
+                :class="{ active: selectedCategory === '' }"
+                @click="handleCategorySelect('')"
+              >
+                Tất cả thể loại
+              </button>
+              <button
+                v-for="cat in categories"
+                :key="cat.id || cat.name"
+                type="button"
+                class="chip-btn"
+                :class="{ active: selectedCategory === cat.name }"
+                @click="handleCategorySelect(cat.name)"
+              >
+                {{ cat.name }}
+              </button>
+            </div>
+
             <button
-              v-for="cat in categories"
-              :key="cat.id || cat.name"
               type="button"
-              class="chip-btn"
-              :class="{ active: selectedCategory === cat.name }"
-              @click="handleCategorySelect(cat.name)"
+              class="slider-nav-btn next-btn"
+              title="Cuộn sang phải"
+              aria-label="Cuộn sang phải"
+              @click="scrollCategories(1)"
             >
-              {{ cat.name }}
+              <PhCaretRight :size="16" weight="bold" />
             </button>
           </div>
         </div>
@@ -519,16 +546,65 @@ onMounted(async () => {
   border-color: #18181b;
 }
 
-.category-chips {
+.category-slider-wrapper {
+  position: relative;
   display: flex;
-  gap: 0.4rem;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.category-chips {
+  flex: 1;
+  display: flex;
+  gap: 0.5rem;
   overflow-x: auto;
-  padding-bottom: 0.25rem;
-  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+  scroll-behavior: smooth;
+  /* Thin custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f4f4f5;
 }
 
 .category-chips::-webkit-scrollbar {
-  display: none;
+  height: 6px;
+}
+
+.category-chips::-webkit-scrollbar-track {
+  background: #f4f4f5;
+  border-radius: 9999px;
+}
+
+.category-chips::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+  transition: background 0.2s ease;
+}
+
+.category-chips::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.slider-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e4e4e7;
+  background: #ffffff;
+  color: #18181b;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.slider-nav-btn:hover {
+  background: #18181b;
+  color: #ffffff;
+  border-color: #18181b;
 }
 
 .chip-btn {
