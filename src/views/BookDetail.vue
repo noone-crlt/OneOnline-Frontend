@@ -1,6 +1,19 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import {
+  PhBookOpen,
+  PhShoppingCartSimple,
+  PhLightning,
+  PhStar,
+  PhCheckCircle,
+  PhBookBookmark,
+  PhFilePdf,
+  PhHeadphones,
+  PhShareNetwork,
+  PhArrowLeft,
+  PhChatCircleText
+} from '@phosphor-icons/vue'
 import { addCartItem, getBookBySlug, getFileUrl } from '../services/api'
 import { toast } from 'vue-sonner'
 import TopNavbar from '../components/layout/TopNavbar.vue'
@@ -25,15 +38,21 @@ const selectedEdition = computed(() => {
 })
 
 const coverUrl = computed(() => {
-  // Try selected edition cover first
   if (selectedEdition.value?.coverObjectName) {
     return selectedEdition.value.coverUrl || getFileUrl(selectedEdition.value.coverObjectName)
   }
-  // Try main book images next
   if (book.value?.imageUrls && book.value.imageUrls.length > 0) {
     return getFileUrl(book.value.imageUrls[0])
   }
   return ''
+})
+
+const discountPercent = computed(() => {
+  if (!selectedEdition.value?.originalPrice || !selectedEdition.value?.salePrice) return 0
+  const orig = Number(selectedEdition.value.originalPrice)
+  const sale = Number(selectedEdition.value.salePrice)
+  if (orig <= sale || orig <= 0) return 0
+  return Math.round(((orig - sale) / orig) * 100)
 })
 
 const getInitials = (title) => {
@@ -56,35 +75,40 @@ function selectEdition(index) {
 
 function formatFormatName(format) {
   switch (format) {
-    case 'PHYSICAL': return 'Sách giấy'
+    case 'PHYSICAL': return 'Sách in giấy'
     case 'EBOOK_PDF': return 'PDF E-book'
     case 'EBOOK_EPUB': return 'EPUB E-book'
-    case 'AUDIOBOOK': return 'Sách nói'
+    case 'AUDIOBOOK': return 'Sách nói (Audio)'
     default: return format
   }
 }
 
-function getFormatIcon(format) {
+function getFormatIconComponent(format) {
   switch (format) {
-    case 'PHYSICAL': return 'PHYS'
-    case 'EBOOK_PDF': return 'PDF'
-    case 'EBOOK_EPUB': return 'EPUB'
-    case 'AUDIOBOOK': return 'AUDIO'
-    default: return 'BOOK'
+    case 'PHYSICAL': return PhBookBookmark
+    case 'EBOOK_PDF': return PhFilePdf
+    case 'EBOOK_EPUB': return PhBookOpen
+    case 'AUDIOBOOK': return PhHeadphones
+    default: return PhBookOpen
   }
 }
 
 function getStockLabel(edition) {
   if (!edition) return 'Đang cập nhật'
-  if (edition.format !== 'PHYSICAL') return 'Đọc trực tuyến ngay'
+  if (edition.format !== 'PHYSICAL') return 'Đọc & Tải ngay tức thì'
   if (edition.stock == null || edition.stock <= 0) return 'Tạm hết hàng'
-  return `Còn lại ${edition.stock} cuốn`
+  return `Còn hàng trong kho (${edition.stock} bản)`
 }
 
 function readSample() {
   if (book.value) {
     router.push(`/read/${book.value.slug}`)
   }
+}
+
+function copyShareLink() {
+  navigator.clipboard.writeText(window.location.href)
+  toast.success('Đã sao chép liên kết tác phẩm!')
 }
 
 async function addToCart() {
@@ -160,7 +184,6 @@ async function fetchBookDetail() {
     const slug = route.params.slug
     const data = await getBookBySlug(slug)
     book.value = data
-    // Default to the first ebook/audiobook format if available, or first format overall
     if (data.editions && data.editions.length > 0) {
       const bestIndex = data.editions.findIndex(e => e.format !== 'PHYSICAL')
       selectedEditionIndex.value = bestIndex !== -1 ? bestIndex : 0
@@ -195,6 +218,9 @@ onMounted(() => {
       <div v-else class="detail-wrapper">
         <!-- Breadcrumb navigation -->
         <nav class="breadcrumb" aria-label="Breadcrumb">
+          <button type="button" class="back-btn" @click="router.back()" title="Quay lại">
+            <PhArrowLeft :size="16" />
+          </button>
           <RouterLink to="/">Trang chủ</RouterLink>
           <span class="sep">/</span>
           <RouterLink to="/library">Thư viện</RouterLink>
@@ -204,13 +230,14 @@ onMounted(() => {
 
         <!-- Product Grid -->
         <div class="product-grid">
-          <!-- Left: Elegant Book Cover -->
+          <!-- Left Column: Elegant Book Cover & Meta Badges -->
           <div class="cover-column">
-            <div class="book-cover-container">
-              <div class="book-cover shadow-elegant">
-                <img v-if="coverUrl" :src="coverUrl" :alt="`Bìa sách ${book.title}`" />
+            <div class="book-cover-stage shadow-editorial">
+              <div class="book-cover-frame">
+                <img v-if="coverUrl" :src="coverUrl" :alt="`Bìa sách ${book.title}`" class="cover-img" />
                 <span v-else class="cover-initials">{{ getInitials(book.title) }}</span>
               </div>
+              <div class="cover-lighting-overlay"></div>
             </div>
             
             <!-- Category Tag Pills -->
@@ -219,96 +246,122 @@ onMounted(() => {
                 {{ cat }}
               </span>
             </div>
+
+            <button type="button" class="share-btn" @click="copyShareLink" title="Chia sẻ tác phẩm">
+              <PhShareNetwork :size="16" />
+              <span>Chia sẻ tác phẩm này</span>
+            </button>
           </div>
 
-          <!-- Right: Book Info & E-commerce actions -->
+          <!-- Right Column: Book Details & Actions -->
           <div class="info-column">
             <div class="book-header-section">
-              <p class="publisher-meta">{{ book.publisherName || 'Thư viện số' }}</p>
+              <div class="publisher-row">
+                <span class="publisher-kicker">{{ book.publisherName || 'NXB Tri Thức Online' }}</span>
+                <span class="rating-badge">
+                  <PhStar :size="14" weight="fill" class="star-icon" />
+                  <strong>4.9</strong> ({{ reviews.length }} đánh giá)
+                </span>
+              </div>
               <h1 class="book-title-heading">{{ book.title }}</h1>
               
               <div class="authors-list" v-if="book.authorNames && book.authorNames.length > 0">
-                <span>Tác giả:</span>
-                <strong>{{ book.authorNames.join(', ') }}</strong>
+                <span class="label">Tác giả:</span>
+                <span class="author-name">{{ book.authorNames.join(', ') }}</span>
               </div>
             </div>
 
-            <!-- Format Selector (E-commerce UX) -->
+            <!-- Format Selector (Tactile Bento Pills) -->
             <div class="formats-section" v-if="book.editions && book.editions.length > 0">
-              <h3>Chọn định dạng sách</h3>
+              <div class="section-label">
+                <span>Chọn định dạng</span>
+                <small>Bản quyền chính thức</small>
+              </div>
               <div class="format-options">
                 <button
                   v-for="(ed, idx) in book.editions"
                   :key="ed.id"
-                  :class="['format-btn', { active: selectedEditionIndex === idx }]"
+                  :class="['format-card-btn', { active: selectedEditionIndex === idx }]"
                   @click="selectEdition(idx)"
                 >
-                  <span class="format-icon">{{ getFormatIcon(ed.format) }}</span>
-                  <span class="format-name">{{ formatFormatName(ed.format) }}</span>
+                  <component :is="getFormatIconComponent(ed.format)" :size="20" class="format-icon" />
+                  <div class="format-text-wrap">
+                    <span class="format-name">{{ formatFormatName(ed.format) }}</span>
+                    <span class="format-price-tag">{{ formatPrice(ed.salePrice) }}</span>
+                  </div>
                 </button>
               </div>
             </div>
 
-            <!-- Price & Availability Section -->
-            <div class="pricing-section" v-if="selectedEdition">
-              <div class="price-row">
+            <!-- Pricing & Availability Card -->
+            <div class="pricing-card" v-if="selectedEdition">
+              <div class="price-box">
                 <span class="sale-price">{{ formatPrice(selectedEdition.salePrice) }}</span>
                 <span class="original-price" v-if="selectedEdition.originalPrice && selectedEdition.originalPrice > selectedEdition.salePrice">
                   {{ formatPrice(selectedEdition.originalPrice) }}
                 </span>
+                <span class="discount-badge" v-if="discountPercent > 0">
+                  -{{ discountPercent }}%
+                </span>
               </div>
-              <div class="availability-row">
-                <span class="status-indicator"></span>
-                <span class="availability-text">{{ getStockLabel(selectedEdition) }}</span>
+              <div class="availability-status">
+                <PhCheckCircle :size="16" class="check-icon" />
+                <span>{{ getStockLabel(selectedEdition) }}</span>
               </div>
             </div>
 
-            <!-- Tactile Action Grid -->
+            <!-- Action Buttons Grid -->
             <div class="actions-section">
               <button 
-                class="btn btn-primary btn-cta-buy" 
+                class="btn-cta btn-buy-now" 
                 @click="buyNow" 
                 :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
               >
-                Mua ngay
+                <PhLightning :size="18" weight="fill" />
+                <span>Mua ngay</span>
               </button>
               <button 
-                class="btn btn-secondary btn-cta-cart" 
+                class="btn-cta btn-add-cart" 
                 @click="addToCart" 
                 :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
               >
-                Thêm vào giỏ hàng
+                <PhShoppingCartSimple :size="18" />
+                <span>Thêm vào giỏ</span>
               </button>
               <button 
                 v-if="selectedEdition?.format !== 'PHYSICAL'"
-                class="btn btn-outline btn-cta-read" 
+                class="btn-cta btn-read-sample" 
                 @click="readSample"
               >
-                Đọc thử
+                <PhBookOpen :size="18" />
+                <span>Đọc thử</span>
               </button>
             </div>
 
-            <!-- Info Tab Sections (Editorial Style) -->
+            <!-- Tabs Section -->
             <div class="tabs-section">
               <div class="tabs-header">
                 <button 
                   :class="['tab-title', { active: activeTab === 'description' }]" 
                   @click="activeTab = 'description'"
                 >
-                  Tóm tắt & Giới thiệu
+                  <PhBookOpen :size="16" />
+                  <span>Tóm tắt & Giới thiệu</span>
                 </button>
                 <button 
                   v-if="selectedEdition?.format === 'AUDIOBOOK' && selectedEdition?.audioChapters?.length > 0"
                   :class="['tab-title', { active: activeTab === 'chapters' }]" 
                   @click="activeTab = 'chapters'"
                 >
-                  Mục lục chương
+                  <PhHeadphones :size="16" />
+                  <span>Mục lục audio ({{ selectedEdition.audioChapters.length }})</span>
                 </button>
                 <button 
                   :class="['tab-title', { active: activeTab === 'reviews' }]" 
                   @click="activeTab = 'reviews'"
                 >
-                  Đánh giá & Bình luận ({{ reviews.length }})
+                  <PhChatCircleText :size="16" />
+                  <span>Đánh giá ({{ reviews.length }})</span>
                 </button>
               </div>
 
@@ -320,9 +373,9 @@ onMounted(() => {
                 <div v-else-if="activeTab === 'chapters'" class="tab-chapters">
                   <ul class="chapters-grid">
                     <li v-for="ch in selectedEdition.audioChapters" :key="ch.id" class="chapter-item">
-                      <span class="ch-num">#{ ch.chapterNumber }</span>
+                      <span class="ch-num">Chương {{ ch.chapterNumber }}</span>
                       <span class="ch-name">{{ ch.title }}</span>
-                      <span class="ch-dur">{{ ch.duration }}p</span>
+                      <span class="ch-dur">{{ ch.duration }} phút</span>
                     </li>
                   </ul>
                 </div>
@@ -330,9 +383,9 @@ onMounted(() => {
                 <div v-else-if="activeTab === 'reviews'" class="tab-reviews">
                   <!-- Review Form -->
                   <form class="review-form" @submit.prevent="submitReview">
-                    <h4>Viết đánh giá của bạn</h4>
+                    <h4>Gửi cảm nhận của bạn</h4>
                     <div class="rating-select-group">
-                      <span class="label">Đánh giá điểm:</span>
+                      <span class="label">Đánh giá:</span>
                       <div class="star-rating-options">
                         <button 
                           v-for="star in 5" 
@@ -342,9 +395,7 @@ onMounted(() => {
                           @click="newRating = star"
                           aria-label="Chọn sao"
                         >
-                          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                          </svg>
+                          <PhStar :size="18" :weight="newRating >= star ? 'fill' : 'regular'" />
                         </button>
                       </div>
                     </div>
@@ -352,14 +403,14 @@ onMounted(() => {
                     <div class="comment-input-group">
                       <textarea 
                         v-model="newComment" 
-                        placeholder="Chia sẻ cảm nghĩ của bạn về tác phẩm này..."
+                        placeholder="Chia sẻ suy ngẫm hoặc góc nhìn của bạn về tác phẩm này..."
                         rows="3"
                         required
                       ></textarea>
                     </div>
 
-                    <button class="btn btn-secondary btn-submit-review" type="submit">
-                      Gửi bình luận
+                    <button class="btn-submit-review" type="submit">
+                      Gửi đánh giá
                     </button>
                   </form>
 
@@ -371,13 +422,14 @@ onMounted(() => {
                     <div v-else class="reviews-list">
                       <div v-for="rev in reviews" :key="rev.id" class="review-card">
                         <div class="review-card-header">
-                          <span class="user-name">{{ rev.userName }}</span>
+                          <div class="user-info">
+                            <div class="user-avatar">{{ rev.userName.slice(0, 1) }}</div>
+                            <span class="user-name">{{ rev.userName }}</span>
+                          </div>
                           <span class="review-date">{{ rev.createdAt }}</span>
                         </div>
                         <div class="review-stars">
-                          <svg v-for="star in 5" :key="star" viewBox="0 0 24 24" width="12" height="12" :fill="rev.rating >= star ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                          </svg>
+                          <PhStar v-for="star in 5" :key="star" :size="14" :weight="rev.rating >= star ? 'fill' : 'regular'" class="star-icon" />
                         </div>
                         <p class="review-comment-text">{{ rev.comment }}</p>
                       </div>
@@ -397,59 +449,18 @@ onMounted(() => {
 <style scoped>
 .book-detail-shell {
   min-height: 100vh;
-  background-color: var(--page-bg);
+  background-color: #FCFAF7;
   display: flex;
   flex-direction: column;
-}
-
-
-
-.topbar-nav {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-link {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--text-soft);
-  font-weight: 500;
-  padding: 0.25rem 0;
-  transition: color 200ms ease;
-}
-
-.nav-link:hover, .nav-link.active {
-  color: var(--text-strong);
-}
-
-.topbar-utility {
-  display: inline-flex;
-  align-items: center;
-  height: 38px;
-  padding: 0 1.2rem;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  color: var(--text-strong);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  transition: background-color 200ms ease, border-color 200ms ease;
-}
-
-.topbar-utility:hover {
-  background-color: var(--surface-soft);
-  border-color: var(--accent);
 }
 
 /* Main content layout */
 .detail-container {
   flex: 1;
   width: 100%;
-  max-width: var(--content-width);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 2rem 5rem;
+  padding: 2rem 1.5rem 6rem;
 }
 
 .detail-loading, .detail-error {
@@ -457,18 +468,17 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  font-family: var(--font-body);
+  min-height: 450px;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(43, 33, 24, 0.1);
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(15, 23, 42, 0.1);
   border-radius: 50%;
-  border-top-color: var(--accent);
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 1rem;
+  border-top-color: #0f172a;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1.25rem;
 }
 
 @keyframes spin {
@@ -476,466 +486,547 @@ onMounted(() => {
 }
 
 .error-msg {
-  color: #a83a32;
+  color: #ef4444;
   font-size: 1.1rem;
   margin-bottom: 1.5rem;
-}
-
-.btn {
-  padding: 0.75rem 1.8rem;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition: all 200ms ease;
-}
-
-.btn-secondary {
-  border: 1px solid var(--line-strong);
-  color: var(--text-strong);
-}
-
-.btn-secondary:hover {
-  background-color: rgba(43, 33, 24, 0.03);
 }
 
 /* Breadcrumb */
 .breadcrumb {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  margin-bottom: 2.5rem;
+  gap: 0.6rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  margin-right: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
 }
 
 .breadcrumb a {
-  color: var(--text-soft);
-  transition: color 200ms ease;
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.18s ease;
 }
 
 .breadcrumb a:hover {
-  color: var(--accent);
+  color: #0f172a;
 }
 
 .breadcrumb .sep {
-  opacity: 0.5;
+  color: #cbd5e1;
 }
 
 .breadcrumb .current {
-  color: var(--text-strong);
-  font-weight: 500;
+  color: #0f172a;
+  font-weight: 600;
 }
 
-/* Product Grid */
+/* Product Grid Layout */
 .product-grid {
   display: grid;
-  grid-template-columns: 350px 1fr;
-  gap: 4rem;
+  grid-template-columns: 340px 1fr;
+  gap: 3.5rem;
   align-items: start;
 }
 
-/* Left Cover Image styling */
+/* Left Cover Stage */
 .cover-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1.25rem;
+  position: sticky;
+  top: 90px;
 }
 
-.book-cover-container {
-  width: 100%;
-  max-width: 300px;
-}
-
-.book-cover {
+.book-cover-stage {
   position: relative;
   width: 100%;
+  max-width: 300px;
   aspect-ratio: 2/3;
-  background-color: var(--surface-soft);
-  border-radius: var(--radius-sm);
+  border-radius: 1.25rem;
+  background: #ffffff;
   overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.shadow-editorial {
+  box-shadow: 0 20px 50px -15px rgba(15, 23, 42, 0.12), 0 6px 16px -6px rgba(0, 0, 0, 0.04);
+}
+
+.book-cover-stage:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 30px 70px -20px rgba(15, 23, 42, 0.18);
+}
+
+.book-cover-frame {
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--line-soft);
 }
 
-/* Spine crease shadow simulation for premium editorial feel */
-.book-cover::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 10px;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.14) 0%, rgba(0, 0, 0, 0.04) 30%, transparent 100%);
-  pointer-events: none;
-}
-
-.shadow-elegant {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06), 0 8px 16px rgba(0, 0, 0, 0.04);
-}
-
-.book-cover img {
+.cover-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .cover-initials {
-  font-family: var(--font-body);
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--text-soft);
-  letter-spacing: 0.05em;
+  font-size: 3rem;
+  font-weight: 800;
+  color: #94a3b8;
+}
+
+.cover-lighting-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 60%),
+              linear-gradient(to right, rgba(0, 0, 0, 0.12) 0%, rgba(0, 0, 0, 0.02) 25%, transparent 100%);
+  pointer-events: none;
 }
 
 .categories-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
   justify-content: center;
 }
 
 .cat-pill {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  background-color: var(--surface-soft);
-  color: var(--text-soft);
-  padding: 0.3rem 0.8rem;
-  border-radius: 99px;
-  border: 1px solid var(--line-soft);
+  font-size: 0.78rem;
+  background: #f1f5f9;
+  color: #334155;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid #cbd5e1;
+  font-weight: 500;
 }
 
-/* Right Info column styling */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.825rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.18s ease;
+}
+
+.share-btn:hover {
+  color: #0f172a;
+}
+
+/* Right Info Column */
 .info-column {
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
+  gap: 2rem;
 }
 
-.publisher-meta {
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--accent);
-  font-weight: 600;
+.publisher-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.5rem;
 }
 
+.publisher-kicker {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #d97706;
+  font-weight: 700;
+}
+
+.rating-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.825rem;
+  color: #334155;
+  background: #fef3c7;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid #fde68a;
+}
+
+.star-icon {
+  color: #d97706;
+}
+
 .book-title-heading {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 3.5vw, 3.2rem);
-  line-height: 1.1;
-  color: var(--text-strong);
-  font-weight: 500;
-  margin-bottom: 0.8rem;
+  font-size: clamp(2.1rem, 3.2vw, 3rem);
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.8rem 0;
 }
 
 .authors-list {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: var(--text);
+  font-size: 1rem;
+  color: #475569;
 }
 
-.authors-list strong {
-  color: var(--text-strong);
+.authors-list .label {
+  color: #64748b;
+  margin-right: 0.35rem;
 }
 
-/* Format selector styles */
-.formats-section h3 {
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-soft);
-  margin-bottom: 0.8rem;
+.authors-list .author-name {
+  color: #0f172a;
   font-weight: 600;
+}
+
+/* Formats Section */
+.formats-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.section-label small {
+  text-transform: none;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0;
 }
 
 .format-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.85rem;
 }
 
-.format-btn {
+.format-card-btn {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
-  background-color: var(--surface);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 0.88rem;
-  font-weight: 500;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.875rem;
+  background: #ffffff;
+  color: #334155;
   cursor: pointer;
-  transition: all 180ms ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
-.format-btn:hover {
-  background-color: var(--surface-soft);
-  border-color: var(--line-strong);
+.format-card-btn:hover {
+  border-color: #0f172a;
+  background: #f8fafc;
+  transform: translateY(-2px);
 }
 
-.format-btn.active {
-  border-color: var(--text-strong);
-  background-color: var(--surface-soft);
-  color: var(--text-strong);
-  font-weight: 600;
+.format-card-btn.active {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: 0 8px 20px -6px rgba(15, 23, 42, 0.25);
 }
 
 .format-icon {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.3rem;
-  border-radius: var(--radius-sm);
-  background-color: var(--surface);
-  color: var(--text-soft);
-  border: 1px solid var(--line-soft);
+  flex-shrink: 0;
 }
 
-/* Pricing and Availability styling */
-.pricing-section {
+.format-card-btn.active .format-icon {
+  color: #ffffff;
+}
+
+.format-text-wrap {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
-  background-color: var(--surface);
-  padding: 1.2rem 1.6rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--line-soft);
-  max-width: 450px;
+  gap: 0.15rem;
 }
 
-.price-row {
+.format-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.format-price-tag {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+/* Pricing Card */
+.pricing-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  background: #ffffff;
+  padding: 1.25rem 1.6rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.04);
+}
+
+.price-box {
   display: flex;
   align-items: baseline;
-  gap: 0.8rem;
+  gap: 0.75rem;
 }
 
 .sale-price {
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--text-strong);
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.03em;
 }
 
 .original-price {
-  font-family: var(--font-body);
   font-size: 1rem;
   text-decoration: line-through;
-  color: var(--text-soft);
+  color: #94a3b8;
 }
 
-.availability-row {
-  display: flex;
+.discount-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dc2626;
+  background: #fef2f2;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #fecaca;
+}
+
+.availability-status {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-family: var(--font-body);
+  gap: 0.4rem;
   font-size: 0.85rem;
+  font-weight: 600;
+  color: #16a34a;
 }
 
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  background-color: var(--pastel-green-text);
-  border-radius: 50%;
-}
-
-.availability-text {
-  color: var(--pastel-green-text);
-  font-weight: 500;
-}
-
-/* Actions buttons styling */
+/* Actions Section */
 .actions-section {
   display: flex;
+  gap: 0.85rem;
   flex-wrap: wrap;
-  gap: 0.8rem;
 }
 
-.btn-cta-buy {
-  background-color: var(--text-strong);
-  color: var(--surface);
-  border: 1px solid var(--text-strong);
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-buy-now {
   flex: 1.5;
-  min-width: 140px;
+  min-width: 150px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 6px 20px -4px rgba(15, 23, 42, 0.2);
 }
 
-.btn-cta-buy:hover {
-  background-color: #2F3437;
-  border-color: #2F3437;
+.btn-buy-now:hover {
+  background: #1e293b;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.3);
 }
 
-.btn-cta-buy:active,
-.btn-cta-cart:active,
-.btn-cta-read:active {
+.btn-add-cart {
+  flex: 1.5;
+  min-width: 150px;
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.btn-add-cart:hover {
+  background: #f8fafc;
+  border-color: #0f172a;
+  transform: translateY(-2px);
+}
+
+.btn-read-sample {
+  flex: 1;
+  min-width: 120px;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-read-sample:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: translateY(-2px);
+}
+
+.btn-cta:active {
   transform: scale(0.98);
 }
 
-.btn-cta-cart {
-  background-color: var(--surface);
-  color: var(--text-strong);
-  border: 1px solid var(--line-strong);
-  flex: 1.5;
-  min-width: 140px;
-}
-
-.btn-cta-cart:hover {
-  background-color: var(--surface-soft);
-}
-
-.btn-cta-read {
-  background-color: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--line-soft);
-  flex: 1;
-  min-width: 100px;
-}
-
-.btn-cta-read:hover {
-  background-color: var(--surface-soft);
-  color: var(--text-strong);
-}
-
-.btn-cta-buy:disabled,
-.btn-cta-cart:disabled {
-  opacity: 0.4;
+.btn-cta:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-/* Editorial Tabs styling */
+/* Tabs Section */
 .tabs-section {
-  border-top: 1px solid var(--line-soft);
-  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 2rem;
   margin-top: 1rem;
 }
 
 .tabs-header {
   display: flex;
-  gap: 2rem;
-  border-bottom: 1px solid var(--line-soft);
-  margin-bottom: 1.25rem;
+  gap: 1.75rem;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 1.5rem;
 }
 
 .tab-title {
-  font-family: var(--font-body);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 0.9rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-soft);
-  padding-bottom: 0.75rem;
+  color: #64748b;
+  padding-bottom: 0.85rem;
+  border: none;
   border-bottom: 2px solid transparent;
+  background: transparent;
   cursor: pointer;
-  transition: all 200ms ease;
+  transition: all 0.18s ease;
 }
 
-.tab-title:hover, .tab-title.active {
-  color: var(--text-strong);
+.tab-title:hover {
+  color: #0f172a;
 }
 
 .tab-title.active {
-  border-bottom-color: var(--accent);
+  color: #0f172a;
+  border-bottom-color: #0f172a;
 }
 
 .tab-description {
-  max-width: 65ch;
+  max-width: 70ch;
 }
 
 .description-text {
-  font-family: var(--font-body);
   font-size: 1rem;
-  line-height: 1.7;
-  color: var(--text);
-  text-align: justify;
+  line-height: 1.75;
+  color: #334155;
+  white-space: pre-line;
 }
 
+/* Chapters List */
 .chapters-grid {
   display: flex;
   flex-direction: column;
-  max-height: 300px;
+  gap: 0.5rem;
+  max-height: 320px;
   overflow-y: auto;
   padding-right: 0.5rem;
+  list-style: none;
+  margin: 0;
 }
 
 .chapter-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.85rem 0;
-  border-bottom: 1px solid var(--line-soft);
-  font-family: var(--font-body);
-  font-size: 0.92rem;
-  background: none;
-  border-radius: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 0.625rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  font-size: 0.9rem;
 }
 
 .ch-num {
-  font-family: var(--font-mono);
   font-size: 0.8rem;
-  opacity: 0.5;
-  width: 40px;
+  font-weight: 700;
+  color: #64748b;
+  width: 90px;
 }
 
 .ch-name {
   flex: 1;
-  font-weight: 500;
-  color: var(--text-strong);
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .ch-dur {
-  font-family: var(--font-mono);
   font-size: 0.8rem;
-  opacity: 0.6;
+  color: #64748b;
 }
 
-/* Mobile responsive layout */
-@media (max-width: 768px) {
-  .product-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-  .cover-column {
-    align-items: center;
-  }
-}
-
-/* Reviews Tab Styling */
+/* Reviews Styling */
 .review-form {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
   padding: 1.5rem;
-  background-color: var(--surface-soft);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
 }
 
 .review-form h4 {
-  font-family: var(--font-body);
-  margin: 0 0 1rem;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: var(--text-strong);
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
 }
 
 .rating-select-group {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-bottom: 1rem;
-}
-
-.rating-select-group .label {
-  font-size: 0.88rem;
-  color: var(--text-soft);
 }
 
 .star-rating-options {
@@ -946,94 +1037,134 @@ onMounted(() => {
 .star-option-btn {
   background: none;
   border: none;
-  color: var(--line-strong);
+  color: #cbd5e1;
   cursor: pointer;
   padding: 2px;
-  transition: color 150ms ease;
+  transition: color 0.15s ease;
 }
 
 .star-option-btn:hover,
 .star-option-btn.active {
-  color: var(--text-strong);
+  color: #d97706;
 }
 
 .comment-input-group textarea {
   width: 100%;
-  padding: 0.8rem 1rem;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
-  background-color: var(--surface);
-  color: var(--text);
-  font-family: var(--font-body);
-  font-size: 0.92rem;
-  line-height: 1.5;
-  resize: vertical;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.625rem;
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: inherit;
+  font-size: 0.9rem;
   outline: none;
-  transition: border-color 150ms ease;
+  resize: vertical;
+  transition: border-color 0.18s ease;
   margin-bottom: 1rem;
 }
 
 .comment-input-group textarea:focus {
-  border-color: var(--text-strong);
+  border-color: #0f172a;
+  background: #ffffff;
 }
 
 .btn-submit-review {
-  padding: 0.6rem 1.2rem;
+  padding: 0.65rem 1.5rem;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-radius: var(--radius-sm);
+  border: none;
+  border-radius: 0.625rem;
+  background: #0f172a;
+  color: #ffffff;
   cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.btn-submit-review:hover {
+  background: #1e293b;
 }
 
 .no-reviews {
   padding: 2rem 0;
   text-align: center;
-  color: var(--text-soft);
-  font-size: 0.92rem;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .review-card {
-  padding: 1.2rem 0;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.review-card:last-child {
-  border-bottom: none;
+  padding: 1.25rem;
+  border-radius: 0.875rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
 }
 
 .review-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.5rem;
 }
 
-.review-card-header .user-name {
-  font-size: 0.92rem;
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+
+.user-name {
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-strong);
+  color: #0f172a;
 }
 
-.review-card-header .review-date {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-soft);
+.review-date {
+  font-size: 0.8rem;
+  color: #94a3b8;
 }
 
 .review-stars {
   display: flex;
   gap: 2px;
-  color: var(--text-strong);
+  color: #d97706;
   margin-bottom: 0.6rem;
 }
 
 .review-comment-text {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   line-height: 1.6;
-  color: var(--text);
+  color: #334155;
   margin: 0;
-  text-align: justify;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .cover-column {
+    position: static;
+  }
 }
 </style>
