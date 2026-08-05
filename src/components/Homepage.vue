@@ -248,18 +248,25 @@ onUnmounted(() => {
         <section class="section-container categories-section">
           <div class="section-header">
             <div class="section-title-group">
-              <h2 class="section-title">Thể loại nổi bật</h2>
+              <div class="title-with-badge">
+                <h2 class="section-title">Thể loại nổi bật</h2>
+                <div v-if="activeCategory !== 'ALL'" class="active-filter-pill">
+                  <span>Đang lọc: <strong>{{ activeCategory }}</strong></span>
+                  <button type="button" class="clear-pill-btn" aria-label="Xóa bộ lọc thể loại" @click.stop="filterByCategory('ALL')">✕</button>
+                </div>
+              </div>
               <p class="section-subtitle">Nhấp vào thể loại để lọc sách nhanh hoặc dùng nút điều hướng</p>
             </div>
             <div class="category-scroll-actions">
-              <button class="scroll-btn" @click="scrollCategories(-1)" title="Cuộn sang trái" aria-label="Cuộn sang trái">
+              <button class="scroll-btn" title="Cuộn sang trái" aria-label="Cuộn sang trái" @click="scrollCategories(-1)">
                 <ChevronLeft :size="18" />
               </button>
-              <button class="scroll-btn" @click="scrollCategories(1)" title="Cuộn sang phải" aria-label="Cuộn sang phải">
+              <button class="scroll-btn" title="Cuộn sang phải" aria-label="Cuộn sang phía trước" @click="scrollCategories(1)">
                 <ChevronRight :size="18" />
               </button>
             </div>
           </div>
+
           <div ref="categoriesGridRef" class="categories-bento-grid" :class="{ 'has-active': activeCategory !== 'ALL' }">
             <div 
               v-for="cat in featuredCategories" 
@@ -270,15 +277,15 @@ onUnmounted(() => {
             >
               <div class="category-card-top">
                 <div class="category-icon-wrapper">
-                  <component :is="cat.icon" :size="26" stroke-width="1.5" class="category-icon" />
+                  <component :is="cat.icon" :size="24" stroke-width="1.75" class="category-icon" />
                 </div>
-                <div class="category-arrow-btn" @click.stop="goToCategoryLibrary(cat.name, $event)" title="Mở thể loại này trong Thư viện">
-                  <ArrowUpRight :size="18" class="arrow-icon" />
+                <div class="category-arrow-btn" title="Mở thể loại này trong Thư viện" @click.stop="goToCategoryLibrary(cat.name, $event)">
+                  <ArrowUpRight :size="16" class="arrow-icon" />
                 </div>
               </div>
               <div class="category-info">
                 <h4 class="category-name">{{ cat.name }}</h4>
-                <p class="category-count">{{ cat.bookCount }} sách</p>
+                <p class="category-count">{{ cat.bookCount || 0 }} tác phẩm</p>
               </div>
             </div>
           </div>
@@ -728,11 +735,50 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.active-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  font-size: 0.8rem;
+  color: #334155;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.clear-pill-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.clear-pill-btn:hover {
+  color: #0f172a;
+  background: #e2e8f0;
+}
+
 .section-title {
-  font-size: 1.75rem;
+  font-size: 1.85rem;
   font-weight: 700;
   color: var(--text-main);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .view-all-btn {
@@ -764,8 +810,8 @@ onUnmounted(() => {
   -webkit-overflow-scrolling: touch;
   
   /* Padding to prevent hover shadow clipping */
-  padding: 1.5rem 1rem 3rem 1rem;
-  margin: -1.5rem -1rem -3rem -1rem;
+  padding: 1rem 0.5rem 2rem 0.5rem;
+  margin: -1rem -0.5rem -2rem -0.5rem;
   
   /* Hide scrollbar */
   scrollbar-width: none;
@@ -778,35 +824,34 @@ onUnmounted(() => {
 
 /* Base Bento Card Style */
 .category-bento-card {
-  flex: 0 0 240px; /* Fixed width for horizontal scrolling */
+  flex: 0 0 230px; /* Fixed width for horizontal scrolling */
   scroll-snap-align: start;
   position: relative;
-  background: var(--card-bg);
-  border: 1px solid rgba(226, 232, 240, 0.6);
-  border-radius: 2rem;
-  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  min-height: 150px;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.03);
 }
 
 /* Group hover spotlight effect */
 .categories-bento-grid:hover .category-bento-card {
-  opacity: 0.75;
-  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 /* Restores hovered card */
 .categories-bento-grid .category-bento-card:hover {
   opacity: 1 !important;
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 30px 60px -15px rgba(0,0,0,0.1), 0 4px 20px rgba(0,0,0,0.05);
-  border-color: rgba(0,0,0,0.15);
-  filter: grayscale(0%);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 35px -10px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(0, 0, 0, 0.03);
+  border-color: #0f172a;
   z-index: 10;
 }
 
@@ -816,17 +861,16 @@ onUnmounted(() => {
 
 /* Active State Selection (When clicked) */
 .categories-bento-grid.has-active .category-bento-card:not(.is-active) {
-  opacity: 0.4;
-  filter: grayscale(80%);
-  transform: scale(0.96);
+  opacity: 0.5;
+  filter: grayscale(40%);
 }
 
 .categories-bento-grid.has-active .category-bento-card.is-active {
   opacity: 1 !important;
   filter: grayscale(0%);
   border-color: #0f172a;
-  box-shadow: 0 15px 40px -10px rgba(15, 23, 42, 0.15);
-  transform: scale(1.02);
+  box-shadow: 0 12px 30px -8px rgba(15, 23, 42, 0.15);
+  background: #f8fafc;
 }
 
 .clear-category-badge {
@@ -867,18 +911,18 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #f1f5f9;
   color: #64748b;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .category-bento-card:hover .category-arrow-btn {
   background: #0f172a;
   color: #ffffff;
-  transform: translate(2px, -2px) scale(1.08);
+  transform: translate(2px, -2px) scale(1.05);
 }
 
 .category-bento-card.is-active .category-arrow-btn {
@@ -887,7 +931,7 @@ onUnmounted(() => {
 }
 
 .category-arrow-btn .arrow-icon {
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
 }
 
 .category-bento-card:hover .arrow-icon {
@@ -899,12 +943,12 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   background: #f1f5f9;
   border-radius: 12px;
   color: #334155;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .category-bento-card:hover .category-icon-wrapper {
@@ -915,17 +959,17 @@ onUnmounted(() => {
 .category-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
 }
 
 .category-name {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-main);
 }
 
 .category-count {
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   color: var(--text-muted);
 }
 
