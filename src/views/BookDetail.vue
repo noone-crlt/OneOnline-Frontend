@@ -594,14 +594,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@700;800;900&family=Satoshi:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;0,900;1,600&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 .book-detail-shell {
   min-height: 100vh;
   background-color: #FAF8F5;
   display: flex;
   flex-direction: column;
-  font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #0F172A;
   overflow-x: hidden;
 }
@@ -762,7 +762,7 @@ onUnmounted(() => {
 }
 
 .cover-initials {
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 3.5rem;
   font-weight: 900;
   color: #94a3b8;
@@ -914,7 +914,7 @@ onUnmounted(() => {
 }
 
 .book-title-heading {
-  font-family: 'Cabinet Grotesk', -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
   font-size: clamp(2.2rem, 3.8vw, 3.4rem);
   font-weight: 900;
   color: #0f172a;
@@ -1084,7 +1084,7 @@ onUnmounted(() => {
 }
 
 .sale-price {
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 2.25rem;
   font-weight: 900;
   color: #0f172a;
