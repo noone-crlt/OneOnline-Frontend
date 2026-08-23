@@ -556,7 +556,9 @@ export function setDefaultAddress(id) {
 // ============= Reviews & Ratings =============
 
 export function getReviewsByBook(bookId, page = 0, size = 10) {
-  return apiFetch(`/api/reviews/book/${bookId}?page=${page}&size=${size}`)
+  return apiFetch(`/api/reviews/book/${bookId}?page=${page}&size=${size}`, {
+    headers: authHeaders(),
+  })
 }
 
 export function submitBookReview(payload) {
