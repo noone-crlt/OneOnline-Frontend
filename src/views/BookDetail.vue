@@ -12,14 +12,13 @@ import {
   PhBookBookmark,
   PhFilePdf,
   PhHeadphones,
-  PhShareNetwork,
   PhArrowLeft,
   PhChatCircleText,
   PhSealCheck,
   PhShieldCheck,
   PhSparkle
 } from '@phosphor-icons/vue'
-import { addCartItem, getBookBySlug, getFileUrl } from '../services/api'
+import { addCartItem, getBookBySlug, getFileUrl, getReviewsByBook, submitBookReview } from '../services/api'
 import { toast } from 'vue-sonner'
 import TopNavbar from '../components/layout/TopNavbar.vue'
 import AppFooter from '../components/layout/AppFooter.vue'
@@ -126,10 +125,6 @@ function readSample() {
   }
 }
 
-function copyShareLink() {
-  navigator.clipboard.writeText(window.location.href)
-  toast.success('Đã sao chép liên kết tác phẩm!')
-}
 
 async function addToCart() {
   if (!isSignedIn.value) {
@@ -158,43 +153,70 @@ async function buyNow() {
   }
 }
 
-const reviews = ref([
-  {
-    id: 1,
-    userName: 'Nguyễn Văn Hải',
-    rating: 5,
-    createdAt: '2026-06-20',
-    comment: 'Tác phẩm dịch rất mượt mà, bìa sách tối giản sang trọng. Trải nghiệm đọc trực tuyến cực kỳ dễ chịu cho mắt.'
-  },
-  {
-    id: 2,
-    userName: 'Trần Thị Mai',
-    rating: 4,
-    createdAt: '2026-06-25',
-    comment: 'Nội dung rất hay, ý nghĩa sâu sắc. Sách nói giọng đọc truyền cảm, âm thanh chất lượng tốt. Sẽ tiếp tục mua thêm.'
-  }
-])
+const reviews = ref([])
+const isSubmittingReview = ref(false)
 
 const newRating = ref(5)
 const newComment = ref('')
 
-function submitReview() {
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  try {
+    const d = new Date(dateStr)
+    if (isNaN(d.getTime())) return dateStr
+    return d.toLocaleDateString('vi-VN')
+  } catch {
+    return dateStr
+  }
+}
+
+async function fetchBookReviews(bookId) {
+  if (!bookId) return
+  try {
+    const data = await getReviewsByBook(bookId)
+    if (data && Array.isArray(data.content)) {
+      reviews.value = data.content
+    } else if (Array.isArray(data)) {
+      reviews.value = data
+    } else {
+      reviews.value = []
+    }
+  } catch (err) {
+    console.error('Không thể tải bình luận:', err)
+  }
+}
+
+async function submitReview() {
+  if (!isSignedIn.value) {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
   if (!newComment.value.trim()) {
     toast.error('Vui lòng nhập nội dung đánh giá.')
     return
   }
+  if (!book.value?.id) {
+    toast.error('Không tìm thấy thông tin tác phẩm.')
+    return
+  }
   
-  reviews.value.unshift({
-    id: Date.now(),
-    userName: authUser.value?.fullName || 'Khách viếng thăm',
-    rating: newRating.value,
-    createdAt: new Date().toISOString().split('T')[0],
-    comment: newComment.value.trim()
-  })
-  
-  newComment.value = ''
-  newRating.value = 5
-  toast.success('Cảm ơn bạn đã gửi đánh giá thành công!')
+  isSubmittingReview.value = true
+  try {
+    await submitBookReview({
+      bookId: book.value.id,
+      rating: newRating.value,
+      comment: newComment.value.trim()
+    })
+    
+    newComment.value = ''
+    newRating.value = 5
+    toast.success('Cảm ơn bạn đã gửi đánh giá thành công!')
+    await fetchBookReviews(book.value.id)
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Không thể gửi đánh giá.')
+  } finally {
+    isSubmittingReview.value = false
+  }
 }
 
 /* GSAP Physics & Interactive Handlers */
@@ -235,6 +257,9 @@ async function fetchBookDetail() {
     const slug = route.params.slug
     const data = await getBookBySlug(slug)
     book.value = data
+    if (data?.id) {
+      fetchBookReviews(data.id)
+    }
     if (data.editions && data.editions.length > 0) {
       const bestIndex = data.editions.findIndex(e => e.format !== 'PHYSICAL')
       selectedEditionIndex.value = bestIndex !== -1 ? bestIndex : 0
@@ -350,10 +375,7 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <button type="button" class="share-btn" @click="copyShareLink" title="Chia sẻ tác phẩm">
-              <PhShareNetwork :size="16" />
-              <span>Chia sẻ tác phẩm này</span>
-            </button>
+
           </div>
 
           <!-- Right Column: Book Details & Actions -->
@@ -544,10 +566,10 @@ onUnmounted(() => {
                       <div v-for="rev in reviews" :key="rev.id" class="review-card">
                         <div class="review-card-header">
                           <div class="user-info">
-                            <div class="user-avatar">{{ rev.userName.slice(0, 1) }}</div>
-                            <span class="user-name">{{ rev.userName }}</span>
+                            <div class="user-avatar">{{ (rev.reviewerName || rev.userName || 'U').slice(0, 1) }}</div>
+                            <span class="user-name">{{ rev.reviewerName || rev.userName || 'Độc giả' }}</span>
                           </div>
-                          <span class="review-date">{{ rev.createdAt }}</span>
+                          <span class="review-date">{{ formatDate(rev.createdAt) }}</span>
                         </div>
                         <div class="review-stars">
                           <PhStar v-for="star in 5" :key="star" :size="14" :weight="rev.rating >= star ? 'fill' : 'regular'" class="star-icon" />
@@ -837,23 +859,7 @@ onUnmounted(() => {
   color: #059669;
 }
 
-.share-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: transparent;
-  border: none;
-  color: #64748b;
-  font-size: 0.825rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.18s ease;
-  z-index: 1;
-}
 
-.share-btn:hover {
-  color: #0f172a;
-}
 
 /* Right Info Column */
 .info-column {
