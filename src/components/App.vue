@@ -1,11 +1,10 @@
 <script setup>
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 import { Toaster } from 'vue-sonner'
 import { getToken, getCurrentUserProfile } from '../services/api'
 
 const route = useRoute()
-let checkTimer = null
 
 async function checkAccountStatus() {
   const token = getToken()
@@ -19,14 +18,8 @@ async function checkAccountStatus() {
 }
 
 onMounted(() => {
-  // Kiểm tra trạng thái tài khoản mỗi 4 giây để văng user bị ban lập tức
-  checkTimer = setInterval(checkAccountStatus, 4000)
-})
-
-onUnmounted(() => {
-  if (checkTimer) {
-    clearInterval(checkTimer)
-  }
+  // Kiểm tra trạng thái tài khoản 1 lần khi ứng dụng khởi chạy
+  checkAccountStatus()
 })
 </script>
 
