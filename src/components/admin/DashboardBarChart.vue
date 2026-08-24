@@ -122,7 +122,7 @@ const chartOption = computed(() => {
       itemHeight: 10,
       textStyle: {
         color: '#71717a',
-        fontFamily: 'Satoshi, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
         fontSize: 12,
         fontWeight: 500
       },
@@ -143,7 +143,7 @@ const chartOption = computed(() => {
       padding: [12, 16],
       textStyle: {
         color: '#09090b',
-        fontFamily: 'Satoshi, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
         fontSize: 13,
         fontWeight: 500
       },
@@ -162,7 +162,7 @@ const chartOption = computed(() => {
       axisLine: { show: false },
       axisLabel: {
         color: '#71717a',
-        fontFamily: 'Satoshi, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
         fontSize: 12,
         fontWeight: 500,
         margin: 16
@@ -173,7 +173,7 @@ const chartOption = computed(() => {
       splitNumber: 4,
       axisLabel: {
         color: '#a1a1aa',
-        fontFamily: 'Satoshi, sans-serif',
+        fontFamily: 'Plus Jakarta Sans, Inter, sans-serif',
         fontSize: 12,
         formatter: (value) => formatCompactValue(value),
       },
@@ -268,7 +268,7 @@ const chartOption = computed(() => {
   background: #fafafa;
   text-align: center;
   color: #71717a;
-  font-family: 'Satoshi', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
   font-weight: 500;
 }
 

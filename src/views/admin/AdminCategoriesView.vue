@@ -341,7 +341,7 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'JetBrains Mono', 'Geist Mono', Satoshi, monospace;
+  font-family: 'JetBrains Mono', 'Geist Mono', 'Plus Jakarta Sans', monospace;
 }
 
 .page-header h2 {

@@ -357,7 +357,7 @@ onMounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: 'JetBrains Mono', 'Geist Mono', Satoshi, monospace;
+  font-family: 'JetBrains Mono', 'Geist Mono', 'Plus Jakarta Sans', monospace;
 }
 
 .page-header h2 {
@@ -489,7 +489,7 @@ onMounted(() => {
 .flex-3 { flex: 3; }
 
 .id-badge {
-  font-family: 'JetBrains Mono', 'Geist Mono', Satoshi, monospace;
+  font-family: 'JetBrains Mono', 'Geist Mono', 'Plus Jakarta Sans', monospace;
   font-weight: 700;
   font-size: 0.82rem;
   color: #64748b;
@@ -536,7 +536,7 @@ onMounted(() => {
   border-radius: 99px;
   background: rgba(14, 165, 233, 0.1);
   color: #0ea5e9;
-  font-family: 'JetBrains Mono', 'Geist Mono', Satoshi, monospace;
+  font-family: 'JetBrains Mono', 'Geist Mono', 'Plus Jakarta Sans', monospace;
 }
 
 .actions-col {

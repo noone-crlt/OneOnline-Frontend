@@ -450,7 +450,7 @@ onMounted(loadDashboard)
   letter-spacing: -0.03em;
   line-height: 1.1;
   color: white;
-  font-family: Satoshi, monospace;
+  font-family: 'Plus Jakarta Sans', 'Inter', monospace;
 }
 
 .kpi-icon-bg {
@@ -556,7 +556,7 @@ onMounted(loadDashboard)
   font-weight: 800;
   line-height: 1.1;
   color: #0f172a;
-  font-family: 'JetBrains Mono', 'Geist Mono', Satoshi, monospace;
+  font-family: 'JetBrains Mono', 'Geist Mono', 'Plus Jakarta Sans', monospace;
   letter-spacing: -0.02em;
 }
 

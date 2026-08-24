@@ -114,7 +114,7 @@ function toggleMenu() {
   --text-muted: #71717a; /* Zinc 500 */
   --accent: #18181b; /* Zinc 900 */
   
-  font-family: 'Satoshi', 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
   display: flex;
   background-color: var(--bento-bg);
   min-height: 100vh;
