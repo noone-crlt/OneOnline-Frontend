@@ -161,14 +161,22 @@ router.beforeEach(async (to) => {
   hydrateSession()
 
   const currentUser = authUser.value
+  const isAdmin = currentUser?.roles?.includes('ADMIN') ?? false
+
+  // Tách biệt quyền: Admin không được vào homepage hoặc các trang dành cho người dùng
+  if (currentUser && isAdmin) {
+    const isTargetAdminRoute = Boolean(to.meta.requiresAdmin || to.path.startsWith('/admin'))
+    if (!isTargetAdminRoute) {
+      return { name: 'admin-dashboard' }
+    }
+  }
 
   if (to.meta.requiresAuth && !currentUser) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
 
   if (to.meta.guestOnly && currentUser) {
-    const hasAdminAccess = await ensureAdminAccess()
-    return hasAdminAccess ? { name: 'admin-dashboard' } : { name: 'library' }
+    return isAdmin ? { name: 'admin-dashboard' } : { name: 'home' }
   }
 
   if (to.meta.requiresAdmin) {
@@ -181,7 +189,7 @@ router.beforeEach(async (to) => {
 
     const hasAccess = await ensureAdminAccess()
     if (!hasAccess) {
-      return authUser.value ? { name: 'library' } : { name: 'login', query: { redirect: to.fullPath } }
+      return authUser.value ? { name: 'home' } : { name: 'login', query: { redirect: to.fullPath } }
     }
   }
 

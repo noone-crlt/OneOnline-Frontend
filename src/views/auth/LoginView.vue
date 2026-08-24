@@ -82,11 +82,18 @@ function resolveTarget(user) {
   const redirect = redirectTarget.value
   const isAdmin = user?.roles?.includes('ADMIN') ?? false
 
+  if (isAdmin) {
+    if (redirect && redirect.startsWith('/admin')) {
+      return redirect
+    }
+    return '/admin'
+  }
+
   if (redirect && redirect.startsWith('/') && !redirect.startsWith('/admin')) {
     return redirect
   }
 
-  return isAdmin ? '/admin' : '/library'
+  return '/'
 }
 
 async function handleSubmit() {
