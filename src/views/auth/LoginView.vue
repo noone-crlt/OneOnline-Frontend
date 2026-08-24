@@ -11,7 +11,10 @@ import {
   BookOpen, 
   Sparkles, 
   CheckCircle2, 
-  AlertCircle 
+  AlertCircle,
+  ArrowUpRight,
+  ShieldCheck,
+  Zap
 } from 'lucide-vue-next'
 
 import { login, loginWithGoogle } from '../../stores/auth'
@@ -183,541 +186,777 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="auth-page">
-    <div class="auth-container">
-      <!-- Left side: Visual & Branding -->
-      <div class="auth-visual">
-        <div class="visual-bg-glow"></div>
-        <div class="visual-content">
-          <div class="visual-top">
-            <RouterLink class="back-link" to="/">
-              <ArrowLeft :size="18" />
-              <span>Về trang chủ</span>
+  <main class="vanguard-auth-page">
+    <!-- Ambient Background Mesh Orbs -->
+    <div class="mesh-orb mesh-orb-1"></div>
+    <div class="mesh-orb mesh-orb-2"></div>
+    <div class="mesh-orb mesh-orb-3"></div>
+    <div class="noise-overlay"></div>
+
+    <!-- Outer Double-Bezel Hardware Shell -->
+    <div class="doppelrand-shell">
+      <div class="doppelrand-core">
+        
+        <!-- Left Side: Cinematic Branding & Visual World -->
+        <div class="brand-visual-panel">
+          <div class="visual-header">
+            <RouterLink class="back-pill-btn" to="/">
+              <ArrowLeft :size="15" />
+              <span>Trang chủ</span>
             </RouterLink>
-          </div>
 
-          <div class="visual-center">
-            <div class="brand-badge">
-              <BookOpen :size="20" class="brand-icon" />
-              <span>OneOnline</span>
+            <div class="brand-identity-badge">
+              <div class="brand-logo-icon">
+                <BookOpen :size="16" />
+              </div>
+              <span class="brand-name">ONE ONLINE</span>
             </div>
-            <h1 class="visual-title">Khám phá tri thức & những câu chuyện bất tận</h1>
-            <p class="visual-desc">Đọc sách điện tử, nghe sách nói và đặt mua bản in chất lượng cao tại thư viện kỹ thuật số hàng đầu.</p>
           </div>
 
-          <div class="visual-bottom">
-            <div class="quote-glass-card">
+          <div class="visual-body">
+            <div class="eyebrow-pill">
+              <Sparkles :size="12" class="eyebrow-sparkle" />
+              <span>Nâng tầm tri thức số</span>
+            </div>
+
+            <h1 class="visual-headline">
+              Khám phá thế giới <br />
+              <span class="gradient-text">sách không giới hạn.</span>
+            </h1>
+
+            <p class="visual-subtext">
+              Thư viện Kỹ thuật số hàng đầu. Trải nghiệm đọc sách điện tử mượt mà, nghe audiobook chất lượng cao và sở hữu bản in cao cấp.
+            </p>
+
+            <!-- Feature Pills -->
+            <div class="feature-pills-row">
+              <div class="feature-tag">
+                <Zap :size="14" class="feature-icon" />
+                <span>Đọc tức thì</span>
+              </div>
+              <div class="feature-tag">
+                <ShieldCheck :size="14" class="feature-icon" />
+                <span>Bảo mật 100%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="visual-footer">
+            <div class="glass-quote-card">
               <div class="quote-header">
-                <Sparkles :size="16" class="sparkle-icon" />
-                <span>Trải nghiệm nâng tầm</span>
+                <span class="quote-badge">Cảm hứng đọc sách</span>
               </div>
-              <p class="quote-text">"Sách là nguồn tri thức không bao giờ vơi cạn."</p>
+              <p class="quote-content">
+                "Sách là nguồn tri thức không bao giờ vơi cạn, mở ra những đường chấn phương trời mới."
+              </p>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Right side: Form -->
-      <div class="auth-form-wrapper">
-        <div class="auth-form-inner">
-          <div class="form-header">
-            <h2 class="form-title">Chào mừng trở lại</h2>
-            <p class="form-subtitle">Vui lòng nhập thông tin để đăng nhập vào tài khoản của bạn</p>
+        <!-- Right Side: Form Shell & Interactive Area -->
+        <div class="form-interaction-panel">
+          <div class="form-panel-inner">
+            <header class="auth-header">
+              <h2 class="auth-title">Chào mừng trở lại</h2>
+              <p class="auth-subtitle">Vui lòng nhập thông tin đăng nhập để tiếp tục</p>
+            </header>
+
+            <form class="vanguard-form" @submit.prevent="handleSubmit">
+              <!-- Success Alert -->
+              <transition name="fade">
+                <div v-if="successMessage" class="vanguard-alert alert-success" role="status">
+                  <CheckCircle2 :size="18" class="alert-icon" />
+                  <span>{{ successMessage }}</span>
+                </div>
+              </transition>
+
+              <!-- Form Group: Email -->
+              <div class="vanguard-field">
+                <label for="email" class="field-label">Địa chỉ Email</label>
+                <div class="input-bezel">
+                  <Mail :size="18" class="field-icon" />
+                  <input
+                    id="email"
+                    v-model="form.email"
+                    type="email"
+                    placeholder="name@example.com"
+                    required
+                    :disabled="isBusy"
+                    autocomplete="email"
+                  />
+                </div>
+              </div>
+
+              <!-- Form Group: Password -->
+              <div class="vanguard-field">
+                <div class="label-with-action">
+                  <label for="password" class="field-label">Mật khẩu</label>
+                  <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                </div>
+                <div class="input-bezel">
+                  <Lock :size="18" class="field-icon" />
+                  <input
+                    id="password"
+                    v-model="form.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    placeholder="••••••••"
+                    required
+                    :disabled="isBusy"
+                    autocomplete="current-password"
+                  />
+                  <button 
+                    type="button" 
+                    class="toggle-eye-btn" 
+                    @click="showPassword = !showPassword"
+                    tabindex="-1"
+                    aria-label="Hiện/Ẩn mật khẩu"
+                  >
+                    <EyeOff v-if="showPassword" :size="17" />
+                    <Eye v-else :size="17" />
+                  </button>
+                </div>
+              </div>
+
+              <!-- Options -->
+              <div class="form-row-options">
+                <label class="custom-checkbox-wrapper">
+                  <input type="checkbox" class="real-checkbox" />
+                  <span class="custom-check"></span>
+                  <span class="remember-label">Ghi nhớ đăng nhập</span>
+                </label>
+              </div>
+
+              <!-- Error Alert -->
+              <transition name="fade">
+                <div v-if="errorMessage" class="vanguard-alert alert-error">
+                  <AlertCircle :size="18" class="alert-icon" />
+                  <span>{{ errorMessage }}</span>
+                </div>
+              </transition>
+
+              <!-- High-End CTA Button with Nested Island Icon -->
+              <button class="vanguard-cta-btn group" type="submit" :disabled="isBusy">
+                <span v-if="isSubmitting" class="glow-spinner"></span>
+                <template v-else>
+                  <span class="btn-text">Đăng nhập</span>
+                  <div class="island-icon-badge">
+                    <LogIn :size="16" class="icon-slide" />
+                  </div>
+                </template>
+              </button>
+
+              <!-- Divider -->
+              <div class="auth-separator">
+                <span class="separator-text">Hoặc đăng nhập với</span>
+              </div>
+
+              <!-- Google OAuth Area -->
+              <div class="google-auth-container" :class="{ 'is-loading': isGoogleSubmitting }">
+                <div ref="googleButton" class="google-rendered-btn"></div>
+                <span v-if="isGoogleSubmitting" class="google-status-text">Đang xác thực Google…</span>
+                <span v-else-if="googleUnavailable" class="google-status-text">
+                  Đăng nhập Google chưa được cấu hình.
+                </span>
+              </div>
+            </form>
+
+            <footer class="auth-footer-prompt">
+              <span>Chưa có tài khoản?</span>
+              <RouterLink to="/register" class="register-pill-link">
+                <span>Đăng ký ngay</span>
+                <ArrowUpRight :size="14" />
+              </RouterLink>
+            </footer>
           </div>
-
-          <form class="auth-form" @submit.prevent="handleSubmit">
-            <div v-if="successMessage" class="alert alert-success" role="status">
-              <CheckCircle2 :size="18" />
-              <span>{{ successMessage }}</span>
-            </div>
-
-            <div class="form-group">
-              <label for="email">Địa chỉ Email</label>
-              <div class="input-wrapper">
-                <Mail :size="18" class="input-icon" />
-                <input
-                  id="email"
-                  v-model="form.email"
-                  type="email"
-                  placeholder="name@example.com"
-                  required
-                  :disabled="isBusy"
-                />
-              </div>
-            </div>
-
-            <div class="form-group">
-              <div class="label-row">
-                <label for="password">Mật khẩu</label>
-                <a href="#" class="forgot-password">Quên mật khẩu?</a>
-              </div>
-              <div class="input-wrapper">
-                <Lock :size="18" class="input-icon" />
-                <input
-                  id="password"
-                  v-model="form.password"
-                  :type="showPassword ? 'text' : 'password'"
-                  placeholder="••••••••"
-                  required
-                  :disabled="isBusy"
-                />
-                <button 
-                  type="button" 
-                  class="toggle-password-btn" 
-                  @click="showPassword = !showPassword"
-                  tabindex="-1"
-                >
-                  <EyeOff v-if="showPassword" :size="18" />
-                  <Eye v-else :size="18" />
-                </button>
-              </div>
-            </div>
-
-            <div class="form-options">
-              <label class="remember-me">
-                <input type="checkbox" class="custom-checkbox" />
-                <span>Ghi nhớ đăng nhập</span>
-              </label>
-            </div>
-
-            <div v-if="errorMessage" class="alert alert-error">
-              <AlertCircle :size="18" />
-              <span>{{ errorMessage }}</span>
-            </div>
-
-            <button class="submit-btn" type="submit" :disabled="isBusy">
-              <span v-if="isSubmitting" class="spinner"></span>
-              <template v-else>
-                <span>Đăng nhập</span>
-                <LogIn :size="18" />
-              </template>
-            </button>
-
-            <div class="auth-divider" aria-hidden="true">
-              <span>Hoặc tiếp tục với</span>
-            </div>
-
-            <div class="google-login-area" :class="{ 'is-loading': isGoogleSubmitting }">
-              <div ref="googleButton" class="google-button"></div>
-              <span v-if="isGoogleSubmitting" class="google-loading">Đang đăng nhập với Google…</span>
-              <span v-else-if="googleUnavailable" class="google-config-message">
-                Đăng nhập Google chưa được cấu hình.
-              </span>
-            </div>
-          </form>
-
-          <p class="auth-redirect">
-            Chưa có tài khoản?
-            <RouterLink to="/register" class="redirect-link">Đăng ký ngay</RouterLink>
-          </p>
         </div>
+
       </div>
     </div>
   </main>
 </template>
 
 <style scoped>
-.auth-page {
+/* ==========================================================================
+   VANGUARD HIGH-END VISUAL DESIGN SYSTEM (Awwwards / Apple / Linear Aesthetics)
+   ========================================================================== */
+
+.vanguard-auth-page {
+  --page-bg: #070a12;
+  --surface-outer: rgba(255, 255, 255, 0.04);
+  --surface-inner: rgba(15, 23, 42, 0.75);
+  --border-outer: rgba(255, 255, 255, 0.08);
+  --border-inner: rgba(255, 255, 255, 0.12);
+  --text-heading: #f8fafc;
+  --text-body: #94a3b8;
+  --accent-glow: #6366f1;
+  
   min-height: 100dvh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8fafc;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.04) 0px, transparent 50%);
+  background-color: var(--page-bg);
+  font-family: 'Plus Jakarta Sans', 'Geist', system-ui, -apple-system, sans-serif;
   padding: 1.5rem;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  color: var(--text-heading);
 }
 
-.auth-container {
+/* Ambient Radial Mesh Orbs */
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.6;
+}
+
+.mesh-orb-1 {
+  width: 500px;
+  height: 500px;
+  top: -10%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, transparent 70%);
+}
+
+.mesh-orb-2 {
+  width: 600px;
+  height: 600px;
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(79, 70, 229, 0.2) 0%, transparent 70%);
+}
+
+.mesh-orb-3 {
+  width: 400px;
+  height: 400px;
+  top: 40%;
+  left: 30%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, transparent 70%);
+}
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ==========================================================================
+   DOPPELRAND (DOUBLE-BEZEL) HARDWARE ARCHITECTURE
+   ========================================================================== */
+
+.doppelrand-shell {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 1020px;
+  min-height: 640px;
+  background: var(--surface-outer);
+  border: 1px solid var(--border-outer);
+  border-radius: 2.5rem;
+  padding: 0.65rem;
+  box-shadow: 
+    0 40px 100px -20px rgba(0, 0, 0, 0.6),
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.doppelrand-core {
   display: flex;
   width: 100%;
-  max-width: 1000px;
+  height: 100%;
   min-height: 620px;
-  background: #ffffff;
-  border-radius: 2rem;
-  border: 1px solid rgba(226, 232, 240, 0.8);
-  box-shadow: 0 25px 70px -15px rgba(15, 23, 42, 0.08), 0 4px 20px rgba(0, 0, 0, 0.02);
+  background: var(--surface-inner);
+  border: 1px solid var(--border-inner);
+  border-radius: calc(2.5rem - 0.65rem);
   overflow: hidden;
-  transition: all 0.3s ease;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 
-.auth-container-reverse {
-  flex-direction: row-reverse;
-}
+/* ==========================================================================
+   LEFT SIDE: BRAND VISUAL PANEL
+   ========================================================================== */
 
-/* Visual Section (Left / Right) */
-.auth-visual {
-  flex: 1;
+.brand-visual-panel {
+  flex: 1.1;
   position: relative;
-  background: #0f172a;
-  overflow: hidden;
+  background: 
+    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.12) 0%, transparent 50%),
+    linear-gradient(145deg, #090e1a 0%, #0f172a 60%, #060911 100%);
+  padding: 3rem 2.5rem;
   display: none;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
 }
 
-@media (min-width: 768px) {
-  .auth-visual {
+@media (min-width: 840px) {
+  .brand-visual-panel {
     display: flex;
   }
 }
 
-.visual-bg-glow {
-  position: absolute;
-  inset: 0;
-  background: 
-    radial-gradient(circle at 15% 15%, rgba(99, 102, 241, 0.22) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(79, 70, 229, 0.18) 0%, transparent 45%),
-    linear-gradient(145deg, #0f172a 0%, #1e293b 60%, #090d16 100%);
-  z-index: 1;
-}
-
-.visual-content {
-  position: relative;
-  z-index: 10;
-  padding: 3rem 2.5rem;
+.visual-header {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: space-between;
   width: 100%;
-  box-sizing: border-box;
-  color: #ffffff;
 }
 
-.back-link {
+.back-pill-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #ffffff;
+  gap: 0.45rem;
+  color: #e2e8f0;
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.875rem;
-  padding: 0.5rem 1.1rem;
+  font-size: 0.8rem;
+  padding: 0.45rem 1rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.back-link:hover {
+.back-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.35);
   transform: translateX(-3px);
 }
 
-.brand-badge {
+.brand-identity-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.brand-logo-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.65rem;
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
+}
+
+.brand-name {
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #f8fafc;
+}
+
+.visual-body {
+  margin: 2rem 0;
+}
+
+.eyebrow-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 0.9rem;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 9999px;
-  background: rgba(99, 102, 241, 0.25);
-  border: 1px solid rgba(165, 180, 252, 0.35);
-  color: #e0e7ff;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(165, 180, 252, 0.25);
+  color: #c7d2fe;
+  font-size: 0.75rem;
   font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
   margin-bottom: 1.25rem;
 }
 
-.visual-title {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  line-height: 1.25;
-  letter-spacing: -0.02em;
-  margin: 0 0 1rem 0;
-  color: #ffffff;
-  text-shadow: none;
+.eyebrow-sparkle {
+  color: #a5b4fc;
 }
 
-.visual-desc {
+.visual-headline {
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.visual-subtext {
   font-size: 0.95rem;
-  color: rgba(241, 245, 249, 0.85);
-  line-height: 1.6;
-  margin: 0;
-  max-width: 95%;
+  color: rgba(226, 232, 240, 0.8);
+  line-height: 1.65;
+  margin: 0 0 1.75rem 0;
+  max-width: 90%;
   font-weight: 400;
 }
 
-.quote-glass-card {
-  background: rgba(255, 255, 255, 0.06);
+.feature-pills-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.feature-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.feature-icon {
+  color: #818cf8;
+}
+
+.glass-quote-card {
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 1.25rem;
   padding: 1.25rem 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .quote-header {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #c7d2fe;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
-.quote-text {
-  font-size: 0.9rem;
-  color: #f8fafc;
+.quote-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.quote-content {
+  font-size: 0.88rem;
+  color: #f1f5f9;
   line-height: 1.5;
   margin: 0;
-  font-weight: 400;
+  font-style: italic;
 }
 
-/* Form Section (Right) */
-.auth-form-wrapper {
+/* ==========================================================================
+   RIGHT SIDE: FORM INTERACTION PANEL
+   ========================================================================== */
+
+.form-interaction-panel {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 3rem 2.5rem;
-  background: #ffffff;
+  background: rgba(15, 23, 42, 0.95);
 }
 
-.auth-form-inner {
+.form-panel-inner {
   width: 100%;
   max-width: 380px;
 }
 
-.form-header {
+.auth-header {
   margin-bottom: 2rem;
 }
 
-.form-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0 0 0.5rem 0;
+.auth-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0 0 0.4rem 0;
   letter-spacing: -0.03em;
 }
 
-.form-subtitle {
-  color: #64748b;
+.auth-subtitle {
+  color: #94a3b8;
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
 }
 
-.auth-form {
+.vanguard-form {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.875rem;
-}
-
-.form-group {
+.vanguard-field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 
-.label-row {
+.label-with-action {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.form-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #334155;
+.field-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 0.01em;
 }
 
-.input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.input-icon {
-  position: absolute;
-  left: 0.9rem;
-  color: #94a3b8;
-  pointer-events: none;
-  transition: color 0.2s ease;
-}
-
-.input-wrapper input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0.75rem 1rem 0.75rem 2.6rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.875rem;
-  font-size: 0.95rem;
-  color: #0f172a;
-  background-color: #f8fafc;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  outline: none;
-}
-
-.input-wrapper input:focus {
-  border-color: #0f172a;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06);
-}
-
-.input-wrapper input:focus ~ .input-icon,
-.input-wrapper:focus-within .input-icon {
-  color: #0f172a;
-}
-
-.input-wrapper input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.toggle-password-btn {
-  position: absolute;
-  right: 0.75rem;
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  padding: 0.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: color 0.2s ease;
-}
-
-.toggle-password-btn:hover {
-  color: #0f172a;
-}
-
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #475569;
-  cursor: pointer;
-  user-select: none;
-}
-
-.custom-checkbox {
-  width: 1rem;
-  height: 1rem;
-  border-radius: 0.25rem;
-  accent-color: #0f172a;
-  cursor: pointer;
-}
-
-.forgot-password {
-  color: #4f46e5;
-  font-size: 0.85rem;
+.forgot-link {
+  color: #818cf8;
+  font-size: 0.82rem;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
-.forgot-password:hover {
-  color: #3730a3;
+.forgot-link:hover {
+  color: #a5b4fc;
   text-decoration: underline;
 }
 
-/* Alerts */
-.alert {
+/* Input Bezel (Doppelrand Micro-Architecture) */
+.input-bezel {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.875rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.alert-success {
-  background-color: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.field-icon {
+  position: absolute;
+  left: 1rem;
+  color: #64748b;
+  pointer-events: none;
+  transition: color 0.2s ease;
 }
 
-.alert-error {
-  background-color: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+.input-bezel input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.8rem 1rem 0.8rem 2.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  font-size: 0.95rem;
+  color: #f8fafc;
+  background-color: rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  font-family: inherit;
 }
 
-/* Submit Button */
-.submit-btn {
+.input-bezel input:focus {
+  border-color: rgba(99, 102, 241, 0.6);
+  background-color: rgba(0, 0, 0, 0.4);
+  box-shadow: 
+    0 0 0 4px rgba(99, 102, 241, 0.15),
+    inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.input-bezel input:focus ~ .field-icon,
+.input-bezel:focus-within .field-icon {
+  color: #818cf8;
+}
+
+.input-bezel input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-eye-btn {
+  position: absolute;
+  right: 0.85rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  width: 100%;
-  padding: 0.85rem 1.25rem;
-  background-color: #0f172a;
-  color: #ffffff;
-  border: none;
-  border-radius: 0.875rem;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.toggle-eye-btn:hover {
+  color: #f8fafc;
+}
+
+/* Checkbox */
+.form-row-options {
+  display: flex;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.custom-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.real-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.custom-check {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.real-checkbox:checked ~ .custom-check {
+  background: #6366f1;
+  border-color: #6366f1;
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+.remember-label {
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Alerts */
+.vanguard-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 1.1rem;
+  border-radius: 0.95rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.alert-success {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.alert-error {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.alert-icon {
+  flex-shrink: 0;
+}
+
+/* ==========================================================================
+   NESTED CTA & "ISLAND" BUTTON ARCHITECTURE
+   ========================================================================== */
+
+.vanguard-cta-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
   margin-top: 0.25rem;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  overflow: hidden;
 }
 
-.submit-btn:hover:not(:disabled) {
-  background-color: #1e293b;
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+.vanguard-cta-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.6);
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
 }
 
-.submit-btn:active:not(:disabled) {
+.vanguard-cta-btn:active:not(:disabled) {
   transform: scale(0.98);
 }
 
-.submit-btn:disabled {
-  opacity: 0.65;
+.vanguard-cta-btn:disabled {
+  opacity: 0.6;
   cursor: wait;
 }
 
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #94a3b8;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0.25rem 0;
+.btn-text {
+  flex: 1;
+  text-align: center;
 }
 
-.auth-divider::before,
-.auth-divider::after {
+/* Island Icon Badge */
+.island-icon-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.vanguard-cta-btn:hover .island-icon-badge {
+  transform: scale(1.08) translateX(2px);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.auth-separator {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0.5rem 0;
+}
+
+.auth-separator::before,
+.auth-separator::after {
   content: '';
   height: 1px;
   flex: 1;
-  background: #e2e8f0;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.google-login-area {
+.google-auth-container {
   min-height: 44px;
   display: flex;
   flex-direction: column;
@@ -726,73 +965,70 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
 }
 
-.google-login-area.is-loading .google-button {
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.google-button {
+.google-rendered-btn {
   width: 100%;
-  min-height: 40px;
   display: flex;
   justify-content: center;
 }
 
-.google-button :deep(iframe) {
+.google-rendered-btn :deep(iframe) {
   max-width: 100% !important;
 }
 
-.google-loading,
-.google-config-message {
-  color: #64748b;
+.google-status-text {
+  color: #94a3b8;
   font-size: 0.82rem;
   text-align: center;
 }
 
 /* Spinner */
-.spinner {
-  width: 1.2rem;
-  height: 1.2rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+.glow-spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.25);
   border-top-color: #ffffff;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
-/* Redirect text */
-.auth-redirect {
-  margin-top: 1.75rem;
+.auth-footer-prompt {
+  margin-top: 2rem;
   text-align: center;
-  font-size: 0.9rem;
-  color: #64748b;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-.redirect-link {
-  color: #0f172a;
+.register-pill-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #818cf8;
   font-weight: 700;
   text-decoration: none;
-  margin-left: 0.25rem;
   transition: color 0.2s ease;
 }
 
-.redirect-link:hover {
-  color: #4f46e5;
+.register-pill-link:hover {
+  color: #a5b4fc;
   text-decoration: underline;
-}
-
-/* Animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>

@@ -8,8 +8,7 @@ import {
   PhUsers,
   PhPenNib,
   PhSignOut,
-  PhCaretDown,
-  PhHouse
+  PhCaretDown
 } from '@phosphor-icons/vue'
 
 import { authUser, logout } from '../../stores/auth'
@@ -61,13 +60,6 @@ function toggleMenu() {
         <RouterLink class="nav-link" active-class="active" to="/admin/authors">
           <PhPenNib :size="20" weight="duotone" />
           Tác giả
-        </RouterLink>
-        
-        <div class="nav-divider"></div>
-        
-        <RouterLink class="nav-link return-link" to="/library">
-          <PhHouse :size="20" weight="duotone" />
-          Trang chủ đọc sách
         </RouterLink>
       </nav>
       
