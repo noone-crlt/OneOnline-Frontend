@@ -7,11 +7,9 @@ export class ApiError extends Error {
   }
 }
 
-// Frontend có thể chạy local nhưng API chính được triển khai trên Cloud Run.
-// Khi cần dùng backend local, đặt VITE_API_BASE_URL=http://localhost:8080 trong .env.local.
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ??
-  'https://book-area-api-313942406394.asia-southeast1.run.app'
+// Mặc định gọi API cùng origin để Nginx chuyển tiếp tới backend trong Docker Compose.
+// Khi chạy frontend riêng, có thể đặt VITE_API_BASE_URL=http://localhost:8080 trong .env.local.
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
 const MINIO_BASE_URL = 
   import.meta.env.VITE_MINIO_URL ?? 
   'https://minio1.webtui.vn:9000'
