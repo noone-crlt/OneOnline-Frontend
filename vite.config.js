@@ -15,6 +15,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  test: {
+    environment: 'jsdom',
+  },
   // Thêm đoạn cấu hình dưới đây để chạy với Cloudflare Tunnel
   server: {
     host: '0.0.0.0',
