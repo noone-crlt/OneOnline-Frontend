@@ -291,7 +291,7 @@ onBeforeUnmount(() => {
               <div class="vanguard-field">
                 <div class="label-with-action">
                   <label for="password" class="field-label">Mật khẩu</label>
-                  <a href="#" class="forgot-link">Quên mật khẩu?</a>
+                  <router-link to="/forgot-password" class="forgot-link">Quên mật khẩu?</router-link>
                 </div>
                 <div class="input-bezel">
                   <Lock :size="18" class="field-icon" />
