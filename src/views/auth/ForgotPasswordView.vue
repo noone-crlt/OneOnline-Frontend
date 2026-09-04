@@ -277,6 +277,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import OtpInput from '../../components/auth/OtpInput.vue'
+import { sendForgotPasswordOtp, verifyOtp, resetPassword } from '../../services/api'
 
 const stepLabels = ['Email', 'Mã OTP', 'Mật khẩu']
 const currentStep = ref(1)
@@ -330,7 +331,7 @@ const strengthColorClass = computed(() => {
 })
 
 // Step 1: Send OTP to Email
-function handleSendOtp() {
+async function handleSendOtp() {
   emailError.value = ''
   
   if (!email.value || !email.value.includes('@') || !email.value.includes('.')) {
@@ -339,37 +340,47 @@ function handleSendOtp() {
   }
 
   isLoading.value = true
-  setTimeout(() => {
-    isLoading.value = false
+  try {
+    await sendForgotPasswordOtp(email.value.trim())
     currentStep.value = 2
-  }, 1000)
+  } catch (error) {
+    emailError.value = error instanceof Error ? error.message : 'Không thể gửi mã OTP. Vui lòng kiểm tra lại email.'
+  } finally {
+    isLoading.value = false
+  }
 }
 
 // Step 2: Verify OTP
-function handleOtpComplete(code) {
+async function handleOtpComplete(code) {
   otpError.value = false
   otpErrorMessage.value = ''
   isLoading.value = true
 
-  setTimeout(() => {
+  try {
+    await verifyOtp(email.value.trim(), code)
+    currentStep.value = 3
+  } catch (error) {
+    otpError.value = true
+    otpErrorMessage.value = error instanceof Error ? error.message : 'Mã OTP không hợp lệ hoặc đã hết hạn.'
+  } finally {
     isLoading.value = false
-    // Demo rule: code "123456" or any non-empty code advances for testing
-    if (code === '123456' || code.length === 6) {
-      currentStep.value = 3
-    } else {
-      otpError.value = true
-      otpErrorMessage.value = 'Mã OTP không đúng. Thử dùng mã demo: 123456'
-    }
-  }, 1200)
+  }
 }
 
-function handleResendOtp() {
+async function handleResendOtp() {
   otpError.value = false
+  otpErrorMessage.value = ''
   otpCode.value = ''
+  try {
+    await sendForgotPasswordOtp(email.value.trim())
+  } catch (error) {
+    otpError.value = true
+    otpErrorMessage.value = error instanceof Error ? error.message : 'Không thể gửi lại mã OTP.'
+  }
 }
 
 // Step 3: Reset Password
-function handleResetPassword() {
+async function handleResetPassword() {
   passwordError.value = ''
 
   if (newPassword.value.length < 8) {
@@ -383,10 +394,18 @@ function handleResetPassword() {
   }
 
   isLoading.value = true
-  setTimeout(() => {
-    isLoading.value = false
+  try {
+    await resetPassword({
+      email: email.value.trim(),
+      otp: otpCode.value,
+      newPassword: newPassword.value,
+    })
     currentStep.value = 4
-  }, 1500)
+  } catch (error) {
+    passwordError.value = error instanceof Error ? error.message : 'Đặt lại mật khẩu thất bại. Vui lòng thử lại.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 

@@ -567,3 +567,27 @@ export function submitBookReview(payload) {
   })
 }
 
+// ============= Forgot Password & OTP =============
+
+export function sendForgotPasswordOtp(email) {
+  return apiFetch('/api/auth/forgot-password', {
+    method: 'POST',
+    body: { email },
+  })
+}
+
+export function verifyOtp(email, otp) {
+  return apiFetch('/api/auth/verify-otp', {
+    method: 'POST',
+    body: { email, otp },
+  })
+}
+
+export function resetPassword({ email, otp, newPassword }) {
+  return apiFetch('/api/auth/reset-password', {
+    method: 'POST',
+    body: { email, otp, newPassword },
+  })
+}
+
+
