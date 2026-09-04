@@ -10,8 +10,8 @@ export class ApiError extends Error {
 // Mặc định gọi API cùng origin để Nginx chuyển tiếp tới backend trong Docker Compose.
 // Khi chạy frontend riêng, có thể đặt VITE_API_BASE_URL=http://localhost:8080 trong .env.local.
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
-const MINIO_BASE_URL = 
-  import.meta.env.VITE_MINIO_URL ?? 
+const MINIO_BASE_URL =
+  import.meta.env.VITE_MINIO_URL ??
   'https://minio1.webtui.vn:9000'
 const AUTH_STORAGE_KEY = 'book-area-auth-session'
 
@@ -184,12 +184,12 @@ function normalizeAuthResponse(payload) {
   const user = payload?.user ?? (
     payload?.userId && payload?.email
       ? {
-          id: payload.userId,
-          email: payload.email,
-          fullName: payload.fullName ?? '',
-          phone: payload.phone ?? '',
-          roles: Array.isArray(payload.roles) ? payload.roles : [],
-        }
+        id: payload.userId,
+        email: payload.email,
+        fullName: payload.fullName ?? '',
+        phone: payload.phone ?? '',
+        roles: Array.isArray(payload.roles) ? payload.roles : [],
+      }
       : null
   )
 
@@ -566,4 +566,28 @@ export function submitBookReview(payload) {
     body: payload,
   })
 }
+
+// ============= Forgot Password & OTP =============
+
+export function sendForgotPasswordOtp(email) {
+  return apiFetch('/api/auth/forgot-password', {
+    method: 'POST',
+    body: { email },
+  })
+}
+
+export function verifyOtp(email, otp) {
+  return apiFetch('/api/auth/verify-otp', {
+    method: 'POST',
+    body: { email, otp },
+  })
+}
+
+export function resetPassword({ email, otp, newPassword }) {
+  return apiFetch('/api/auth/reset-password', {
+    method: 'POST',
+    body: { email, otp, newPassword },
+  })
+}
+
 

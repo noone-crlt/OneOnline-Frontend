@@ -322,7 +322,7 @@ onBeforeUnmount(() => {
               <div class="form-field">
                 <div class="field-label-row">
                   <label for="password" class="field-label">Mật khẩu</label>
-                  <a href="#" class="field-action-link" tabindex="0">Quên mật khẩu?</a>
+                  <router-link to="/forgot-password" class="field-action-link">Quên mật khẩu?</router-link>
                 </div>
                 <div class="field-bezel">
                   <Lock :size="18" class="field-icon" aria-hidden="true" />

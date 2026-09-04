@@ -12,6 +12,8 @@ import LibraryView from '../components/Library.vue'
 import CatalogView from '../views/CatalogView.vue'
 import LoginView from '../views/auth/LoginView.vue'
 import RegisterView from '../views/auth/RegisterView.vue'
+import OtpVerifyView from '../views/auth/OtpVerifyView.vue'
+import ForgotPasswordView from '../views/auth/ForgotPasswordView.vue'
 import BookDetail from '../views/BookDetail.vue'
 import BookReaderView from '../views/BookReaderView.vue'
 import CartView from '../views/CartView.vue'
@@ -100,6 +102,23 @@ const router = createRouter({
       component: RegisterView,
       meta: {
         title: 'Đăng ký',
+        guestOnly: true,
+      },
+    },
+    {
+      path: '/verify-otp',
+      name: 'verify-otp',
+      component: OtpVerifyView,
+      meta: {
+        title: 'Xác thực OTP',
+      },
+    },
+    {
+      path: '/forgot-password',
+      name: 'forgot-password',
+      component: ForgotPasswordView,
+      meta: {
+        title: 'Quên mật khẩu',
         guestOnly: true,
       },
     },
