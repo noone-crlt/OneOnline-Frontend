@@ -1,4 +1,4 @@
-name: Frontend CI and update deploy branch
+name: Frontend CI and Docker Image
 
 on:
   push:
@@ -6,14 +6,15 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
+  packages: write
 
 concurrency:
   group: deploy-frontend-main
   cancel-in-progress: false
 
 jobs:
-  test-build-update-deploy:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -36,7 +37,18 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Update deploy branch
-        run: |
-          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
-          git push origin HEAD:deploy --force
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/noone-crlt/oneonline-frontend:latest
+            ghcr.io/noone-crlt/oneonline-frontend:${{ github.sha }}
