@@ -224,6 +224,13 @@ export async function loginWithGoogle(credential) {
   return session
 }
 
+export async function sendRegisterOtp(payload) {
+  return apiFetch('/api/auth/register/send-otp', {
+    method: 'POST',
+    body: payload,
+  })
+}
+
 export async function register(payload) {
   return apiFetch('/api/auth/register', {
     method: 'POST',
