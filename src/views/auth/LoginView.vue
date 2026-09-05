@@ -69,7 +69,8 @@ const isSubmitting = ref(false)
 const isGoogleSubmitting = ref(false)
 const googleButton = ref(null)
 const googleUnavailable = ref(false)
-const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID ?? '').trim()
+const DEFAULT_GOOGLE_CLIENT_ID = '1089283733072-k8u563914a8v6j54t2g1q3r.apps.googleusercontent.com'
+const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID).trim()
 let isUnmounted = false
 
 const isBusy = computed(() => isSubmitting.value || isGoogleSubmitting.value)
@@ -126,7 +127,6 @@ async function handleSubmit() {
 
 async function handleGoogleCredential(response) {
   if (!response?.credential || isGoogleSubmitting.value) return
-  if (isGoogleSubmitting.value) return
 
   errorMessage.value = ''
   isGoogleSubmitting.value = true

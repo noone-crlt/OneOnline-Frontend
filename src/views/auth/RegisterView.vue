@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { onMounted, onBeforeUnmount, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
   ArrowLeft, 
@@ -19,7 +19,7 @@ import {
   Smartphone
 } from 'lucide-vue-next'
 
-import { sendRegisterOtp, register } from '../../stores/auth'
+import { sendRegisterOtp, register, loginWithGoogle } from '../../stores/auth'
 import OtpInput from '../../components/auth/OtpInput.vue'
 import authAmbienceImg from '../../assets/auth-reading-ambience.jpg'
 
@@ -42,6 +42,102 @@ const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 const errorMessage = ref('')
 const isSubmitting = ref(false)
+
+const GOOGLE_SCRIPT_ID = 'google-identity-services'
+let googleScriptPromise
+function loadGoogleIdentityScript() {
+  if (window.google?.accounts?.id) return Promise.resolve(window.google)
+  if (googleScriptPromise) return googleScriptPromise
+  googleScriptPromise = new Promise((resolve, reject) => {
+    const existingScript = document.getElementById(GOOGLE_SCRIPT_ID)
+    const handleLoad = () => resolve(window.google)
+    const handleError = () => reject(new Error('Không thể tải dịch vụ đăng nhập Google.'))
+
+    if (existingScript) {
+      existingScript.addEventListener('load', handleLoad, { once: true })
+      existingScript.addEventListener('error', handleError, { once: true })
+      return
+    }
+
+    const script = document.createElement('script')
+    script.id = GOOGLE_SCRIPT_ID
+    script.src = 'https://accounts.google.com/gsi/client?hl=vi'
+    script.async = true
+    script.defer = true
+    script.onload = handleLoad
+    script.onerror = () => {
+      googleScriptPromise = undefined
+      handleError()
+    }
+    document.head.appendChild(script)
+  })
+  return googleScriptPromise
+}
+
+const isGoogleSubmitting = ref(false)
+const googleButton = ref(null)
+const googleUnavailable = ref(false)
+const DEFAULT_GOOGLE_CLIENT_ID = '1089283733072-k8u563914a8v6j54t2g1q3r.apps.googleusercontent.com'
+const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID).trim()
+let isUnmounted = false
+
+async function handleGoogleCredential(response) {
+  if (!response?.credential || isGoogleSubmitting.value) return
+  errorMessage.value = ''
+  isGoogleSubmitting.value = true
+
+  try {
+    const session = await loginWithGoogle(response.credential)
+    if (!isUnmounted) {
+      const isAdmin = session.user?.roles?.includes('ADMIN')
+      await router.replace(isAdmin ? '/admin' : '/')
+    }
+  } catch (error) {
+    if (!isUnmounted) {
+      errorMessage.value = error instanceof Error ? error.message : 'Đăng ký bằng Google thất bại. Vui lòng thử lại.'
+    }
+  } finally {
+    if (!isUnmounted) isGoogleSubmitting.value = false
+  }
+}
+
+onMounted(async () => {
+  if (!googleClientId) {
+    googleUnavailable.value = true
+    return
+  }
+
+  try {
+    const google = await loadGoogleIdentityScript()
+    if (isUnmounted || !googleButton.value) return
+
+    google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: handleGoogleCredential,
+      auto_select: false,
+      cancel_on_tap_outside: true,
+    })
+    google.accounts.id.renderButton(googleButton.value, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      text: 'signup_with',
+      shape: 'rectangular',
+      logo_alignment: 'left',
+      locale: 'vi',
+      width: Math.floor(Math.min(googleButton.value.clientWidth || 320, 380)),
+    })
+  } catch (error) {
+    if (!isUnmounted) {
+      googleUnavailable.value = true
+    }
+  }
+})
+
+onBeforeUnmount(() => {
+  isUnmounted = true
+  if (googleButton.value) googleButton.value.replaceChildren()
+})
 
 function showError(message) {
   errorMessage.value = message
@@ -371,6 +467,24 @@ async function handleResendOtp() {
                   </template>
                 </button>
               </form>
+
+              <!-- Divider -->
+              <div class="or-divider">
+                <span class="divider-line"></span>
+                <span class="divider-text">hoặc tiếp tục với</span>
+                <span class="divider-line"></span>
+              </div>
+
+              <!-- Google OAuth Area -->
+              <div class="oauth-section" :class="{ 'is-loading': isGoogleSubmitting }">
+                <div ref="googleButton" class="google-slot"></div>
+                <p v-if="isGoogleSubmitting" class="oauth-status-msg">
+                  Đang kết nối tài khoản Google...
+                </p>
+                <p v-else-if="googleUnavailable" class="oauth-status-muted">
+                  Đăng nhập Google hiện chưa được kích hoạt
+                </p>
+              </div>
             </template>
 
             <!-- STEP 2: XÁC THỰC MÃ OTP -->
@@ -1089,5 +1203,63 @@ async function handleResendOtp() {
 
 .margin-top-md {
   margin-top: 1.5rem;
+}
+
+/* Or Divider */
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  color: var(--auth-ink-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 1rem 0 0.5rem;
+}
+
+.divider-line {
+  height: 1px;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.divider-text {
+  flex-shrink: 0;
+}
+
+/* OAuth Section */
+.oauth-section {
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.google-slot {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.google-slot :deep(iframe) {
+  max-width: 100% !important;
+}
+
+.oauth-status-msg {
+  color: var(--auth-accent-amber-light);
+  font-size: 0.82rem;
+  text-align: center;
+  margin: 0;
+}
+
+.oauth-status-muted {
+  color: #475569;
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 0;
 }
 </style>
