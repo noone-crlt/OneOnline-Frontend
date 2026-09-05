@@ -16,7 +16,9 @@ import {
   PhChatCircleText,
   PhSealCheck,
   PhShieldCheck,
-  PhSparkle
+  PhSparkle,
+  PhPlus,
+  PhMinus
 } from '@phosphor-icons/vue'
 import { addCartItem, getBookBySlug, getFileUrl, getReviewsByBook, submitBookReview } from '../services/api'
 import { toast } from 'vue-sonner'
@@ -34,6 +36,7 @@ const book = ref(null)
 const isLoading = ref(true)
 const errorMessage = ref('')
 const selectedEditionIndex = ref(0)
+const quantity = ref(1)
 const activeTab = ref('description') // 'description', 'chapters', 'reviews'
 const showStickyBar = ref(false)
 
@@ -82,6 +85,7 @@ function formatPrice(price) {
 
 function selectEdition(index) {
   selectedEditionIndex.value = index
+  quantity.value = 1
   nextTick(() => {
     if (coverRef.value) {
       gsap.fromTo(coverRef.value, 
@@ -90,6 +94,35 @@ function selectEdition(index) {
       )
     }
   })
+}
+
+function decreaseQuantity() {
+  if (quantity.value > 1) {
+    quantity.value -= 1
+  }
+}
+
+function increaseQuantity() {
+  const maxStock = selectedEdition.value?.stock != null ? Number(selectedEdition.value.stock) : 99
+  if (selectedEdition.value?.stock != null && selectedEdition.value.stock <= 0) return
+  if (quantity.value < maxStock) {
+    quantity.value += 1
+  } else {
+    toast.warning(`Chỉ còn tối đa ${maxStock} bản in trong kho.`)
+  }
+}
+
+function validateQuantity() {
+  const maxStock = selectedEdition.value?.stock != null ? Number(selectedEdition.value.stock) : 99
+  const parsed = parseInt(quantity.value, 10)
+  if (isNaN(parsed) || parsed < 1) {
+    quantity.value = 1
+  } else if (parsed > maxStock) {
+    quantity.value = Math.max(1, maxStock)
+    toast.warning(`Đã điều chỉnh về số lượng tối đa hiện có (${maxStock}).`)
+  } else {
+    quantity.value = parsed
+  }
 }
 
 function formatFormatName(format) {
@@ -125,16 +158,16 @@ function readSample() {
   }
 }
 
-
 async function addToCart() {
   if (!isSignedIn.value) {
     router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
+  const qty = selectedEdition.value?.format === 'PHYSICAL' ? Math.max(1, Number(quantity.value) || 1) : 1
   try {
-    await addCartItem(selectedEdition.value.id, 1)
+    await addCartItem(selectedEdition.value.id, qty)
     await fetchCartItemCount()
-    toast.success('Đã thêm sách vào giỏ hàng thành công!')
+    toast.success(qty > 1 ? `Đã thêm ${qty} cuốn sách vào giỏ hàng!` : 'Đã thêm sách vào giỏ hàng thành công!')
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Không thể thêm sách vào giỏ hàng.')
   }
@@ -145,8 +178,10 @@ async function buyNow() {
     router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
+  const qty = selectedEdition.value?.format === 'PHYSICAL' ? Math.max(1, Number(quantity.value) || 1) : 1
   try {
-    await addCartItem(selectedEdition.value.id, 1)
+    await addCartItem(selectedEdition.value.id, qty)
+    await fetchCartItemCount()
     router.push({ name: 'cart' })
   } catch (error) {
     toast.error(error instanceof Error ? error.message : 'Không thể bắt đầu thanh toán.')
@@ -263,6 +298,7 @@ async function fetchBookDetail() {
     if (data.editions && data.editions.length > 0) {
       const bestIndex = data.editions.findIndex(e => e.format !== 'PHYSICAL')
       selectedEditionIndex.value = bestIndex !== -1 ? bestIndex : 0
+      quantity.value = 1
     }
     
     nextTick(() => {
@@ -287,7 +323,7 @@ function initGsapAnimations() {
     { opacity: 1, y: 0, duration: 0.6 },
     '-=0.5'
   )
-  .fromTo(['.publisher-row', '.authors-list', '.formats-section', '.pricing-card', '.actions-section'], 
+  .fromTo(['.publisher-row', '.authors-list', '.formats-section', '.commerce-panel'], 
     { opacity: 0, y: 20 },
     { opacity: 1, y: 0, duration: 0.5, stagger: 0.1 },
     '-=0.4'
@@ -436,49 +472,130 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- Pricing & Availability Bento Card -->
-            <div class="pricing-card" v-if="selectedEdition">
-              <div class="price-box">
-                <span class="sale-price">{{ formatPrice(selectedEdition.salePrice) }}</span>
-                <span class="original-price" v-if="selectedEdition.originalPrice && selectedEdition.originalPrice > selectedEdition.salePrice">
-                  {{ formatPrice(selectedEdition.originalPrice) }}
-                </span>
-                <span class="discount-badge" v-if="discountPercent > 0">
-                  -{{ discountPercent }}% RẺ HƠN
-                </span>
-              </div>
-              <div class="availability-status">
-                <PhCheckCircle :size="18" class="check-icon" />
-                <span>{{ getStockLabel(selectedEdition) }}</span>
-              </div>
-            </div>
+            <!-- Unified Bento Commerce Panel (Redesigned for Premium UI/UX) -->
+            <div class="commerce-panel" ref="actionsRef" v-if="selectedEdition">
+              <!-- Top Row: Price & Clean Stock Status (No Duplication) -->
+              <div class="commerce-header">
+                <div class="price-stack">
+                  <div class="price-main-row">
+                    <span class="price-current">{{ formatPrice(selectedEdition.salePrice) }}</span>
+                    <span 
+                      class="price-struck" 
+                      v-if="selectedEdition.originalPrice && selectedEdition.originalPrice > selectedEdition.salePrice"
+                    >
+                      {{ formatPrice(selectedEdition.originalPrice) }}
+                    </span>
+                    <span class="discount-tag" v-if="discountPercent > 0">
+                      -{{ discountPercent }}%
+                    </span>
+                  </div>
+                </div>
 
-            <!-- Action Buttons Grid -->
-            <div class="actions-section" ref="actionsRef">
-              <button 
-                class="btn-cta btn-buy-now shimmer-effect" 
-                @click="buyNow" 
-                :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
+                <!-- Status Indicator with Live Pulse Dot -->
+                <div 
+                  class="stock-status-pill" 
+                  :class="{
+                    'is-physical-available': selectedEdition.format === 'PHYSICAL' && selectedEdition.stock > 0,
+                    'is-physical-out': selectedEdition.format === 'PHYSICAL' && (!selectedEdition.stock || selectedEdition.stock <= 0),
+                    'is-digital': selectedEdition.format !== 'PHYSICAL'
+                  }"
+                >
+                  <span class="status-dot"></span>
+                  <span class="status-label">
+                    <template v-if="selectedEdition.format === 'PHYSICAL'">
+                      <template v-if="selectedEdition.stock > 0">Còn {{ selectedEdition.stock }} cuốn có sẵn</template>
+                      <template v-else>Tạm hết hàng</template>
+                    </template>
+                    <template v-else>
+                      Đọc & tải ngay tức thì
+                    </template>
+                  </span>
+                </div>
+              </div>
+
+              <div class="commerce-divider"></div>
+
+              <!-- Bottom Row: Stepper + Ergonomic CTA Buttons in a Unified Row -->
+              <div class="commerce-action-row">
+                <!-- Inline Tactile Stepper (Only for PHYSICAL Books) -->
+                <div v-if="selectedEdition.format === 'PHYSICAL'" class="compact-stepper-container">
+                  <span class="stepper-caption">Số lượng</span>
+                  <div class="compact-stepper">
+                    <button 
+                      type="button" 
+                      class="stepper-btn-mini" 
+                      :disabled="quantity <= 1 || selectedEdition.stock <= 0"
+                      @click="decreaseQuantity"
+                      title="Giảm số lượng"
+                      aria-label="Giảm số lượng"
+                    >
+                      <PhMinus :size="14" weight="bold" />
+                    </button>
+                    <input 
+                      type="number" 
+                      v-model.number="quantity" 
+                      class="stepper-input-mini" 
+                      min="1" 
+                      :max="selectedEdition.stock || 99"
+                      :disabled="selectedEdition.stock <= 0"
+                      @change="validateQuantity"
+                      aria-label="Số lượng sách"
+                    />
+                    <button 
+                      type="button" 
+                      class="stepper-btn-mini" 
+                      :disabled="(selectedEdition.stock > 0 && quantity >= selectedEdition.stock) || selectedEdition.stock <= 0"
+                      @click="increaseQuantity"
+                      title="Tăng số lượng"
+                      aria-label="Tăng số lượng"
+                    >
+                      <PhPlus :size="14" weight="bold" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Primary & Secondary CTA Buttons -->
+                <div class="commerce-buttons-cluster">
+                  <button 
+                    class="btn-cta btn-buy-now shimmer-effect" 
+                    @click="buyNow" 
+                    :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
+                  >
+                    <PhLightning :size="18" weight="fill" />
+                    <span>Mua ngay{{ selectedEdition.format === 'PHYSICAL' && quantity > 1 ? ` (${quantity})` : '' }}</span>
+                  </button>
+                  
+                  <button 
+                    class="btn-cta btn-add-cart" 
+                    @click="addToCart" 
+                    :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
+                  >
+                    <PhShoppingCartSimple :size="18" />
+                    <span>Thêm vào giỏ</span>
+                  </button>
+
+                  <button 
+                    v-if="selectedEdition?.format !== 'PHYSICAL'"
+                    class="btn-cta btn-read-sample" 
+                    @click="readSample"
+                  >
+                    <PhBookOpen :size="18" />
+                    <span>Đọc thử</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dynamic Subtotal Hint (Only for PHYSICAL with quantity > 1) -->
+              <div 
+                v-if="selectedEdition.format === 'PHYSICAL' && quantity > 1" 
+                class="commerce-subtotal-bar"
               >
-                <PhLightning :size="18" weight="fill" />
-                <span>Mua ngay</span>
-              </button>
-              <button 
-                class="btn-cta btn-add-cart" 
-                @click="addToCart" 
-                :disabled="selectedEdition?.format === 'PHYSICAL' && selectedEdition?.stock <= 0"
-              >
-                <PhShoppingCartSimple :size="18" />
-                <span>Thêm vào giỏ</span>
-              </button>
-              <button 
-                v-if="selectedEdition?.format !== 'PHYSICAL'"
-                class="btn-cta btn-read-sample" 
-                @click="readSample"
-              >
-                <PhBookOpen :size="18" />
-                <span>Đọc thử</span>
-              </button>
+                <span class="subtotal-calc-hint">{{ quantity }} cuốn × {{ formatPrice(selectedEdition.salePrice) }}</span>
+                <div class="subtotal-sum">
+                  <span>Tạm tính:</span>
+                  <strong class="subtotal-price">{{ formatPrice(selectedEdition.salePrice * quantity) }}</strong>
+                </div>
+              </div>
             </div>
 
             <!-- Tabs Section -->
@@ -601,9 +718,13 @@ onUnmounted(() => {
           <div class="sticky-buttons">
             <button class="btn-sticky btn-sticky-buy" @click="buyNow">
               <PhLightning :size="16" weight="fill" />
-              <span>Mua ngay</span>
+              <span>Mua ngay{{ selectedEdition?.format === 'PHYSICAL' && quantity > 1 ? ` (${quantity})` : '' }}</span>
             </button>
-            <button class="btn-sticky btn-sticky-cart" @click="addToCart">
+            <button 
+              class="btn-sticky btn-sticky-cart" 
+              @click="addToCart" 
+              :title="selectedEdition?.format === 'PHYSICAL' && quantity > 1 ? `Thêm ${quantity} cuốn vào giỏ` : 'Thêm vào giỏ'"
+            >
               <PhShoppingCartSimple :size="16" />
             </button>
           </div>
@@ -1069,89 +1190,279 @@ onUnmounted(() => {
   opacity: 0.85;
 }
 
-/* Pricing Card */
-.pricing-card {
+/* Unified Bento Commerce Panel */
+.commerce-panel {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+  padding: 1.35rem 1.5rem;
+  gap: 1.15rem;
+  position: relative;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.commerce-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1.25rem;
-  background: #ffffff;
-  padding: 1.35rem 1.75rem;
-  border-radius: 1.15rem;
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  box-shadow: 0 8px 30px -8px rgba(15, 23, 42, 0.05);
-}
-
-.price-box {
-  display: flex;
-  align-items: baseline;
   gap: 0.85rem;
 }
 
-.sale-price {
+.price-stack {
+  display: flex;
+  align-items: baseline;
+}
+
+.price-main-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.price-current {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 2.25rem;
   font-weight: 900;
   color: #0f172a;
   letter-spacing: -0.035em;
+  line-height: 1;
 }
 
-.original-price {
-  font-size: 1.05rem;
+.price-struck {
+  font-size: 1rem;
+  font-weight: 500;
   text-decoration: line-through;
   color: #94a3b8;
 }
 
-.discount-badge {
+.discount-tag {
   font-size: 0.75rem;
   font-weight: 800;
   color: #dc2626;
   background: #fef2f2;
-  padding: 0.25rem 0.6rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 0.5rem;
   border: 1px solid #fecaca;
   letter-spacing: 0.02em;
+  line-height: 1.2;
 }
 
-.availability-status {
+/* Status Indicator with Live Pulse Dot */
+.stock-status-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.875rem;
+  gap: 0.5rem;
+  font-size: 0.825rem;
   font-weight: 700;
-  color: #059669;
+  padding: 0.35rem 0.8rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
 }
 
-/* Actions Section */
-.actions-section {
+.stock-status-pill .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stock-status-pill.is-physical-available {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.stock-status-pill.is-physical-available .status-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.stock-status-pill.is-physical-out {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.stock-status-pill.is-physical-out .status-dot {
+  background: #ef4444;
+}
+
+.stock-status-pill.is-digital {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.stock-status-pill.is-digital .status-dot {
+  background: #22c55e;
+}
+
+@keyframes pulse-ring {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.75;
+  }
+}
+
+.commerce-divider {
+  width: 100%;
+  height: 1px;
+  background: #f1f5f9;
+}
+
+/* Action Row */
+.commerce-action-row {
   display: flex;
-  gap: 1rem;
+  align-items: flex-end;
+  gap: 0.85rem;
   flex-wrap: wrap;
+}
+
+/* Stepper inside panel */
+.compact-stepper-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stepper-caption {
+  font-size: 0.725rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+
+.compact-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.85rem;
+  padding: 3px;
+  height: 48px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.compact-stepper:focus-within {
+  border-color: #0f172a;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.06);
+}
+
+.stepper-btn-mini {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.6rem;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.stepper-btn-mini:hover:not(:disabled) {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+  transform: scale(1.03);
+}
+
+.stepper-btn-mini:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.stepper-btn-mini:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.stepper-input-mini {
+  width: 44px;
+  height: 40px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.stepper-input-mini::-webkit-outer-spin-button,
+.stepper-input-mini::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.stepper-input-mini:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Button Cluster */
+.commerce-buttons-cluster {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 260px;
 }
 
 .btn-cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  padding: 0.95rem 1.85rem;
-  border-radius: 0.875rem;
-  font-size: 0.975rem;
+  gap: 0.55rem;
+  height: 48px;
+  padding: 0 1.5rem;
+  border-radius: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.btn-cta:active {
+  transform: scale(0.98);
+}
+
+.btn-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-buy-now {
-  flex: 1.5;
-  min-width: 160px;
+  flex: 1.3;
+  min-width: 140px;
   background: #0f172a;
   color: #ffffff;
   border: none;
-  box-shadow: 0 8px 25px -4px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.22);
 }
 
 .shimmer-effect::after {
@@ -1176,49 +1487,85 @@ onUnmounted(() => {
   100% { transform: translateX(100%) rotate(30deg); }
 }
 
-.btn-buy-now:hover {
+.btn-buy-now:hover:not(:disabled) {
   background: #1e293b;
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px -4px rgba(15, 23, 42, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px -4px rgba(15, 23, 42, 0.3);
+}
+
+.btn-buy-now:disabled {
+  background: #475569;
+  box-shadow: none;
 }
 
 .btn-add-cart {
-  flex: 1.5;
-  min-width: 160px;
+  flex: 1;
+  min-width: 130px;
   background: #ffffff;
   color: #0f172a;
   border: 1px solid #cbd5e1;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
-.btn-add-cart:hover {
+.btn-add-cart:hover:not(:disabled) {
   background: #f8fafc;
   border-color: #0f172a;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
+}
+
+.btn-add-cart:disabled {
+  border-color: #e2e8f0;
 }
 
 .btn-read-sample {
-  flex: 1;
-  min-width: 130px;
-  background: #f1f5f9;
+  flex: 0.8;
+  min-width: 110px;
+  background: #f8fafc;
   color: #334155;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #e2e8f0;
 }
 
 .btn-read-sample:hover {
   background: #e2e8f0;
   color: #0f172a;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
-.btn-cta:active {
-  transform: scale(0.98);
+/* Subtotal Bar */
+.commerce-subtotal-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 1rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  border: 1px dashed #cbd5e1;
+  font-size: 0.85rem;
+  color: #475569;
+  animation: slideFadeDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-cta:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+.subtotal-calc-hint {
+  color: #64748b;
+  font-size: 0.825rem;
+}
+
+.subtotal-sum {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+
+.subtotal-sum strong {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.975rem;
+}
+
+@keyframes slideFadeDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Tabs Section */
