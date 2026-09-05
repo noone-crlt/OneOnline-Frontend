@@ -1,15 +1,19 @@
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { Search, BookOpenText, TrendingUp, Compass, MonitorSmartphone, Baby, BrainCircuit, Languages, ShoppingCart, Eye, Star, ChevronRight, ChevronLeft, ArrowUpRight } from 'lucide-vue-next'
 import AppFooter from './layout/AppFooter.vue'
 import TopNavbar from './layout/TopNavbar.vue'
 import FeaturedBooksHero from './FeaturedBooksHero.vue'
-import { getBooks, getBookCatalog, getFeaturedCategories, getFileUrl } from '../services/api'
+import { addCartItem, getBooks, getBookCatalog, getFeaturedCategories, getFileUrl } from '../services/api'
 import { authUser } from '../stores/auth'
+import { updateCartItemCount } from '../stores/cart'
+import { toast } from 'vue-sonner'
 import gsap from 'gsap'
 
 const router = useRouter()
+const route = useRoute()
+const addingBookIds = ref(new Set())
 const pageRoot = ref(null)
 const categoriesGridRef = ref(null)
 const books = ref([])
@@ -159,10 +163,38 @@ function openBookDetail(slug) {
   router.push(`/book/${slug}`)
 }
 
-function addToCart(event, book) {
+async function addToCart(event, book) {
   event.stopPropagation()
-  // Add to cart logic will go here
-  console.log('Add to cart', book.title)
+  if (addingBookIds.value.has(book.id)) return
+
+  if (!authUser.value) {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
+
+  const editions = book.editions ?? []
+  if (editions.length > 1) {
+    toast.info('Vui lòng chọn phiên bản sách trước khi thêm vào giỏ hàng.')
+    openBookDetail(book.slug)
+    return
+  }
+
+  const edition = editions[0]
+  if (!edition?.id) {
+    toast.error('Sách hiện chưa có phiên bản để thêm vào giỏ hàng.')
+    return
+  }
+
+  addingBookIds.value.add(book.id)
+  try {
+    const cart = await addCartItem(edition.id, 1)
+    updateCartItemCount(cart.items.reduce((sum, item) => sum + item.quantity, 0))
+    toast.success('Đã thêm sách vào giỏ hàng thành công!')
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : 'Không thể thêm sách vào giỏ hàng.')
+  } finally {
+    addingBookIds.value.delete(book.id)
+  }
 }
 
 function formatPrice(price) {
@@ -373,8 +405,14 @@ onUnmounted(() => {
                   </div>
                   
                   <!-- Add to cart -->
-                  <button class="add-to-cart-btn" @click.stop="addToCart($event, book)">
-                    <ShoppingCart :size="16" /> Thêm vào giỏ
+                  <button
+                    type="button"
+                    class="add-to-cart-btn"
+                    :disabled="addingBookIds.has(book.id)"
+                    :aria-busy="addingBookIds.has(book.id)"
+                    @click.stop="addToCart($event, book)"
+                  >
+                    <ShoppingCart :size="16" /> {{ addingBookIds.has(book.id) ? 'Đang thêm…' : 'Thêm vào giỏ' }}
                   </button>
                 </div>
               </div>
