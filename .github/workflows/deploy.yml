@@ -6,7 +6,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 concurrency:
@@ -52,3 +52,8 @@ jobs:
           tags: |
             ghcr.io/noone-crlt/oneonline-frontend:latest
             ghcr.io/noone-crlt/oneonline-frontend:${{ github.sha }}
+
+      - name: Update deploy branch
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git push origin HEAD:deploy --force
