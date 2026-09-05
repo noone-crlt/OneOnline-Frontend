@@ -11,6 +11,7 @@ import {
   login as apiLogin,
   loginWithGoogle as apiLoginWithGoogle,
   logout as clearAuthSession,
+  sendRegisterOtp as apiSendRegisterOtp,
   register as apiRegister,
   setStoredSession,
 } from '../services/api'
@@ -92,6 +93,10 @@ export async function loginWithGoogle(credential) {
   const session = await apiLoginWithGoogle(credential)
   applySession(session)
   return session
+}
+
+export async function sendRegisterOtp(payload) {
+  return apiSendRegisterOtp(payload)
 }
 
 export async function register(payload) {

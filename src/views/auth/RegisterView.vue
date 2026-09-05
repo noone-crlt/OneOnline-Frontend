@@ -19,10 +19,13 @@ import {
   Smartphone
 } from 'lucide-vue-next'
 
-import { register } from '../../stores/auth'
+import { sendRegisterOtp, register } from '../../stores/auth'
+import OtpInput from '../../components/auth/OtpInput.vue'
 import authAmbienceImg from '../../assets/auth-reading-ambience.jpg'
 
 const router = useRouter()
+
+const currentStep = ref(1)
 
 const form = reactive({
   fullName: '',
@@ -30,6 +33,10 @@ const form = reactive({
   password: '',
   confirmPassword: '',
 })
+
+const otpCode = ref('')
+const otpError = ref(false)
+const otpErrorMessage = ref('')
 
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
@@ -40,7 +47,7 @@ function showError(message) {
   errorMessage.value = message
 }
 
-async function handleSubmit() {
+async function handleSendOtp() {
   errorMessage.value = ''
 
   const fullName = form.fullName.trim()
@@ -71,10 +78,40 @@ async function handleSubmit() {
   isSubmitting.value = true
 
   try {
-    await register({
+    await sendRegisterOtp({
       fullName,
       email,
       password,
+    })
+    currentStep.value = 2
+    otpCode.value = ''
+    otpError.value = false
+    otpErrorMessage.value = ''
+  } catch (error) {
+    showError(error instanceof Error ? error.message : 'Gửi mã OTP thất bại. Vui lòng thử lại.')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+async function handleVerifyOtpAndRegister() {
+  otpError.value = false
+  otpErrorMessage.value = ''
+
+  if (otpCode.value.length < 6) {
+    otpError.value = true
+    otpErrorMessage.value = 'Vui lòng nhập đủ 6 chữ số mã OTP.'
+    return
+  }
+
+  isSubmitting.value = true
+
+  try {
+    await register({
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      otp: otpCode.value,
     })
 
     await router.replace({
@@ -84,9 +121,26 @@ async function handleSubmit() {
       },
     })
   } catch (error) {
-    showError(error instanceof Error ? error.message : 'Đăng ký tài khoản thất bại. Vui lòng thử lại.')
+    otpError.value = true
+    otpErrorMessage.value = error instanceof Error ? error.message : 'Đăng ký tài khoản thất bại. Vui lòng kiểm tra mã OTP.'
   } finally {
     isSubmitting.value = false
+  }
+}
+
+async function handleResendOtp() {
+  otpError.value = false
+  otpErrorMessage.value = ''
+  otpCode.value = ''
+  try {
+    await sendRegisterOtp({
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      password: form.password,
+    })
+  } catch (error) {
+    otpError.value = true
+    otpErrorMessage.value = error instanceof Error ? error.message : 'Không thể gửi lại mã OTP.'
   }
 }
 </script>
@@ -192,129 +246,172 @@ async function handleSubmit() {
               </div>
             </div>
 
-            <header class="form-header">
-              <h2 class="form-heading">Tạo tài khoản mới</h2>
-              <p class="form-subheading">Điền thông tin để bắt đầu trải nghiệm thư viện số OneOnline</p>
-            </header>
+            <!-- STEP 1: FORM NHẬP THÔNG TIN -->
+            <template v-if="currentStep === 1">
+              <header class="form-header">
+                <h2 class="form-heading">Tạo tài khoản mới</h2>
+                <p class="form-subheading">Điền thông tin để bắt đầu trải nghiệm thư viện số OneOnline</p>
+              </header>
 
-            <form class="auth-form" @submit.prevent="handleSubmit">
-              
-              <!-- Full Name Field -->
-              <div class="form-field">
-                <label for="fullName" class="field-label">Họ và tên</label>
-                <div class="field-bezel">
-                  <User :size="18" class="field-icon" aria-hidden="true" />
-                  <input
-                    id="fullName"
-                    v-model="form.fullName"
-                    type="text"
-                    name="name"
-                    placeholder="Nguyễn Văn A"
-                    required
-                    :disabled="isSubmitting"
-                    autocomplete="name"
-                  />
-                </div>
-              </div>
-
-              <!-- Email Field -->
-              <div class="form-field">
-                <label for="email" class="field-label">Địa chỉ Email</label>
-                <div class="field-bezel">
-                  <Mail :size="18" class="field-icon" aria-hidden="true" />
-                  <input
-                    id="email"
-                    v-model="form.email"
-                    type="email"
-                    name="email"
-                    placeholder="name@example.com"
-                    required
-                    :disabled="isSubmitting"
-                    autocomplete="email"
-                  />
-                </div>
-              </div>
-
-              <!-- Password Fields Grid -->
-              <div class="form-fields-dual">
+              <form class="auth-form" @submit.prevent="handleSendOtp">
+                
+                <!-- Full Name Field -->
                 <div class="form-field">
-                  <label for="password" class="field-label">Mật khẩu</label>
+                  <label for="fullName" class="field-label">Họ và tên</label>
                   <div class="field-bezel">
-                    <Lock :size="17" class="field-icon" aria-hidden="true" />
+                    <User :size="18" class="field-icon" aria-hidden="true" />
                     <input
-                      id="password"
-                      v-model="form.password"
-                      :type="showPassword ? 'text' : 'password'"
-                      name="new-password"
-                      placeholder="••••••••"
+                      id="fullName"
+                      v-model="form.fullName"
+                      type="text"
+                      name="name"
+                      placeholder="Nguyễn Văn A"
                       required
                       :disabled="isSubmitting"
-                      autocomplete="new-password"
+                      autocomplete="name"
                     />
-                    <button 
-                      type="button" 
-                      class="field-visibility-btn" 
-                      @click="showPassword = !showPassword"
-                      tabindex="-1"
-                      :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'"
-                    >
-                      <EyeOff v-if="showPassword" :size="16" />
-                      <Eye v-else :size="16" />
-                    </button>
                   </div>
                 </div>
 
+                <!-- Email Field -->
                 <div class="form-field">
-                  <label for="confirmPassword" class="field-label">Xác nhận</label>
+                  <label for="email" class="field-label">Địa chỉ Email</label>
                   <div class="field-bezel">
-                    <Lock :size="17" class="field-icon" aria-hidden="true" />
+                    <Mail :size="18" class="field-icon" aria-hidden="true" />
                     <input
-                      id="confirmPassword"
-                      v-model="form.confirmPassword"
-                      :type="showConfirmPassword ? 'text' : 'password'"
-                      name="confirm-password"
-                      placeholder="••••••••"
+                      id="email"
+                      v-model="form.email"
+                      type="email"
+                      name="email"
+                      placeholder="name@example.com"
                       required
                       :disabled="isSubmitting"
-                      autocomplete="new-password"
+                      autocomplete="email"
                     />
-                    <button 
-                      type="button" 
-                      class="field-visibility-btn" 
-                      @click="showConfirmPassword = !showConfirmPassword"
-                      tabindex="-1"
-                      :aria-label="showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'"
-                    >
-                      <EyeOff v-if="showConfirmPassword" :size="16" />
-                      <Eye v-else :size="16" />
-                    </button>
                   </div>
                 </div>
-              </div>
 
-              <!-- Error Notice Banner -->
-              <transition name="notice-fade">
-                <div v-if="errorMessage" class="feedback-banner banner-error" role="alert">
-                  <AlertCircle :size="18" class="banner-icon" />
-                  <p class="banner-text">{{ errorMessage }}</p>
+                <!-- Password Fields Grid -->
+                <div class="form-fields-dual">
+                  <div class="form-field">
+                    <label for="password" class="field-label">Mật khẩu</label>
+                    <div class="field-bezel">
+                      <Lock :size="17" class="field-icon" aria-hidden="true" />
+                      <input
+                        id="password"
+                        v-model="form.password"
+                        :type="showPassword ? 'text' : 'password'"
+                        name="new-password"
+                        placeholder="••••••••"
+                        required
+                        :disabled="isSubmitting"
+                        autocomplete="new-password"
+                      />
+                      <button 
+                        type="button" 
+                        class="field-visibility-btn" 
+                        @click="showPassword = !showPassword"
+                        tabindex="-1"
+                        :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'"
+                      >
+                        <EyeOff v-if="showPassword" :size="16" />
+                        <Eye v-else :size="16" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="form-field">
+                    <label for="confirmPassword" class="field-label">Xác nhận</label>
+                    <div class="field-bezel">
+                      <Lock :size="17" class="field-icon" aria-hidden="true" />
+                      <input
+                        id="confirmPassword"
+                        v-model="form.confirmPassword"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        name="confirm-password"
+                        placeholder="••••••••"
+                        required
+                        :disabled="isSubmitting"
+                        autocomplete="new-password"
+                      />
+                      <button 
+                        type="button" 
+                        class="field-visibility-btn" 
+                        @click="showConfirmPassword = !showConfirmPassword"
+                        tabindex="-1"
+                        :aria-label="showConfirmPassword ? 'Ẩn mật khẩu' : 'Hiển thị mật khẩu'"
+                      >
+                        <EyeOff v-if="showConfirmPassword" :size="16" />
+                        <Eye v-else :size="16" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </transition>
 
-              <!-- Primary Submit CTA Button -->
-              <button 
-                class="primary-submit-btn" 
-                type="submit" 
-                :disabled="isSubmitting"
-              >
-                <span v-if="isSubmitting" class="action-spinner" aria-label="Đang xử lý đăng ký..."></span>
-                <template v-else>
-                  <span class="submit-label">Đăng ký tài khoản</span>
-                  <span class="submit-icon-nest" aria-hidden="true">
-                    <ArrowRight :size="16" />
-                  </span>
-                </template>
-              </button>
-            </form>
+                <!-- Error Notice Banner -->
+                <transition name="notice-fade">
+                  <div v-if="errorMessage" class="feedback-banner banner-error" role="alert">
+                    <AlertCircle :size="18" class="banner-icon" />
+                    <p class="banner-text">{{ errorMessage }}</p>
+                  </div>
+                </transition>
+
+                <!-- Primary Submit CTA Button -->
+                <button 
+                  class="primary-submit-btn" 
+                  type="submit" 
+                  :disabled="isSubmitting"
+                >
+                  <span v-if="isSubmitting" class="action-spinner" aria-label="Đang gửi mã OTP..."></span>
+                  <template v-else>
+                    <span class="submit-label">Nhận mã xác thực OTP</span>
+                    <span class="submit-icon-nest" aria-hidden="true">
+                      <ArrowRight :size="16" />
+                    </span>
+                  </template>
+                </button>
+              </form>
+            </template>
+
+            <!-- STEP 2: XÁC THỰC MÃ OTP -->
+            <template v-else-if="currentStep === 2">
+              <header class="form-header">
+                <h2 class="form-heading">Xác thực mã OTP</h2>
+                <p class="form-subheading">
+                  Chúng tôi đã gửi mã 6 chữ số tới <strong>{{ form.email }}</strong>. 
+                  <button type="button" class="change-info-link" @click="currentStep = 1">Đổi thông tin</button>
+                </p>
+              </header>
+
+              <div class="otp-step-container">
+                <OtpInput
+                  v-model="otpCode"
+                  :length="6"
+                  :loading="isSubmitting"
+                  :error="otpError"
+                  :error-message="otpErrorMessage"
+                  :resend-cooldown="60"
+                  :auto-focus="true"
+                  @complete="handleVerifyOtpAndRegister"
+                  @resend="handleResendOtp"
+                />
+
+                <button 
+                  class="primary-submit-btn margin-top-md" 
+                  type="button" 
+                  :disabled="otpCode.length < 6 || isSubmitting"
+                  @click="handleVerifyOtpAndRegister"
+                >
+                  <span v-if="isSubmitting" class="action-spinner" aria-label="Đang hoàn tất..."></span>
+                  <template v-else>
+                    <span class="submit-label">Xác nhận & Hoàn tất đăng ký</span>
+                    <span class="submit-icon-nest" aria-hidden="true">
+                      <ArrowRight :size="16" />
+                    </span>
+                  </template>
+                </button>
+              </div>
+            </template>
 
             <footer class="form-footer">
               <span class="footer-prompt">Đã có tài khoản?</span>
@@ -966,5 +1063,31 @@ async function handleSubmit() {
 
 @keyframes spin-loop {
   to { transform: rotate(360deg); }
+}
+
+.change-info-link {
+  background: none;
+  border: none;
+  color: var(--auth-accent-amber-light);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  font-size: 0.88rem;
+}
+
+.change-info-link:hover {
+  color: #ffffff;
+}
+
+.otp-step-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.margin-top-md {
+  margin-top: 1.5rem;
 }
 </style>
